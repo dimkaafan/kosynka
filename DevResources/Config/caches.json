@@ -1,0 +1,12 @@
+[
+	{
+		"id": "mainscene",
+		"sound_caches": [],
+		"music_caches": [],
+		"ccb_caches": [""],
+		"atlas_caches": [""],
+		"image_caches": []
+
+	}
+]
+
