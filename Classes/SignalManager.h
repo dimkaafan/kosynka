@@ -10,6 +10,7 @@
 #define __trapSound__SignalManager__
 
 #include <AudioToolbox/AudioQueue.h>
+#include <vector>
 #include "SignalTypes.h"
 class SignalManager
 {
@@ -26,10 +27,14 @@ public:
                        const AudioTimeStamp *          inStartTime,
                        UInt32                          inNumberPacketDescriptions,
                        const AudioStreamPacketDescription *inPacketDescs);
+    void setOnRecieveFunction(const std::function<void(long long)>& func);
 private:
     AudioQueueRef _queue = nullptr;
     int _bufferCount = 16;
     std::vector<SignalDataType> _rawData;
+    float _dt = 0;
+    long long _recieveCount = 0;
+    std::function<void(long long)> _onRecieve;
     
 };
 

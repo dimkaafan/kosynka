@@ -20,9 +20,16 @@ public:
     CREATE_FUNC(MainScene);
 private:
     MainScene();
+    cocos2d::Label* _count;
+    cocos2d::Node* _pause;
     
     virtual cocos2d::spritebuilder::ccReaderClickCallback onResolveCCBClickSelector(const std::string &selectorName, cocos2d::Node* node) override;
     virtual bool onAssignCCBMemberVariable(const std::string &memberVariableName, cocos2d::Node* node) override;
+    
+    void onPause(cocos2d::Ref* target);
+    void onResume(cocos2d::Ref* target);
+    
+    void onRecieveSignal(long long);
     
     SignalManager _rawSignal;
 };

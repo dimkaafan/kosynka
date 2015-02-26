@@ -7,8 +7,13 @@
 //
 
 #include "SignalManager.h"
-#include <CoreAudio/CoreAudioTypes.h>
 
+#include <set>
+#include <CoreAudio/CoreAudioTypes.h>
+#include "SignalAnalitic.h"
+
+
+static std::set<void*> s_signals;
 
 void audioDelegate(
                    void *                          inUserData,
@@ -18,12 +23,18 @@ void audioDelegate(
                    UInt32                          inNumberPacketDescriptions,
                    const AudioStreamPacketDescription *inPacketDescs)
 {
-    //g_scene->audioDelegate(inUserData, inAQ, inBuffer, inStartTime, inNumberPacketDescriptions, inPacketDescs);
+    auto it = s_signals.find(inUserData);
+    if (it != s_signals.end())
+    {
+        SignalManager* pMan = reinterpret_cast<SignalManager*>(*it);
+        pMan->audioCallback(inUserData, inAQ, inBuffer, inStartTime, inNumberPacketDescriptions, inPacketDescs);
+    }
 }
 
 SignalManager::SignalManager(int bufferCount):
 _queue(nullptr)
 ,_bufferCount(bufferCount)
+,_onRecieve(nullptr)
 {
     
 }
@@ -45,32 +56,25 @@ void SignalManager::init()
     mDataFormat.mBytesPerFrame = mDataFormat.mChannelsPerFrame * sizeof(SignalDataType);
     mDataFormat.mFramesPerPacket = 1;
     mDataFormat.mFormatFlags = kLinearPCMFormatFlagIsBigEndian | kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
-    AudioQueueRef queue;
-    //AudioQueueInputCallback
-    AudioQueueInputCallback AQInputCallback = [](
-                                                 void *                          inUserData,
-                                                 AudioQueueRef                   inAQ,
-                                                 AudioQueueBufferRef             inBuffer,
-                                                 const AudioTimeStamp *          inStartTime,
-                                                 UInt32                          inNumberPacketDescriptions,
-                                                 const AudioStreamPacketDescription *inPacketDescs)
+    _dt = 1.f/mDataFormat.mSampleRate;
+    
+    AudioQueueRef queue = nullptr;
+    AudioQueueNewInput(&mDataFormat, audioDelegate, this, NULL, kCFRunLoopCommonModes, 0, &queue);
+    
+    if (queue)
     {
-        //g_scene->audioCallback(inUserData, inAQ, inBuffer, inStartTime, inNumberPacketDescriptions, inPacketDescs);
-    };
-    
-    AudioQueueNewInput(&mDataFormat, audioDelegate, NULL, NULL, kCFRunLoopCommonModes, 0, &queue);
-    
-    
-    unsigned long frameSize = mDataFormat.mSampleRate * mDataFormat.mBytesPerFrame;
-    std::vector<AudioQueueBufferRef> aBuffers(_bufferCount, nullptr);
+        unsigned long frameSize = mDataFormat.mSampleRate * mDataFormat.mBytesPerFrame;
+        std::vector<AudioQueueBufferRef> aBuffers(_bufferCount, nullptr);
 
-    for (size_t i=0; i< aBuffers.size(); i++)
-    {
-        AudioQueueAllocateBuffer(queue, frameSize, &aBuffers[i]);
-        AudioQueueEnqueueBuffer(queue, aBuffers[i], 0, NULL);
+        for (size_t i=0; i< aBuffers.size(); i++)
+        {
+            AudioQueueAllocateBuffer(queue, frameSize, &aBuffers[i]);
+            AudioQueueEnqueueBuffer(queue, aBuffers[i], 0, NULL);
+        }
+        _queue = queue;
+        _rawData.resize(mDataFormat.mSampleRate*mDataFormat.mChannelsPerFrame);
+        s_signals.insert(this);
     }
-    _queue = queue;
-    _rawData.resize(mDataFormat.mSampleRate*mDataFormat.mChannelsPerFrame);
 }
 
 void SignalManager::start()
@@ -81,5 +85,29 @@ void SignalManager::start()
 
 void SignalManager::pause()
 {
-    
+    if (_queue)
+        AudioQueuePause(_queue);//AudioQueueStop, true
+}
+
+void SignalManager::audioCallback(
+                   void *                          inUserData,
+                   AudioQueueRef                   inAQ,
+                   AudioQueueBufferRef             inBuffer,
+                   const AudioTimeStamp *          inStartTime,
+                   UInt32                          inNumberPacketDescriptions,
+                   const AudioStreamPacketDescription *inPacketDescs)
+{
+    if (this != inUserData)
+        return;
+    _recieveCount++;
+    memcpy(&_rawData[0], inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
+    AudioQueueEnqueueBuffer(_queue, inBuffer, 0, NULL);
+    SignalAnalitic::avarage(_rawData, _dt, 0.1f);
+    if (_onRecieve)
+        _onRecieve(_recieveCount);
+}
+
+void SignalManager::setOnRecieveFunction(const std::function<void(long long)>& func)
+{
+    _onRecieve = func;
 }

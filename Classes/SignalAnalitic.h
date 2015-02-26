@@ -16,6 +16,7 @@ class SignalAnalitic
 public:
     SignalAnalitic();
     ~SignalAnalitic();
+    static std::vector<SignalDataType> avarage(const std::vector<SignalDataType>& signal, float delta, float avDelta);
 private:
     std::vector<SignalDataType> _signal;
 };

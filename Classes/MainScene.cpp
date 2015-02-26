@@ -1,4 +1,5 @@
 #include <CoreAudio/CoreAudioTypes.h>
+//#include "GameHelper/AndroidFix.h"
 #include "MainScene.h"
 #include "SignalTypes.h"
 
@@ -7,6 +8,8 @@ const int AUDIO_BUFFERS = 16;
 USING_NS_CC;
 
 MainScene::MainScene(): _rawSignal(AUDIO_BUFFERS)
+,_count(nullptr)
+,_pause(nullptr)
 {
 
 }
@@ -54,18 +57,40 @@ MainScene::~MainScene()
 void MainScene::initAudio()
 {
     _rawSignal.init();
+    _rawSignal.setOnRecieveFunction([this](long long count)
+                                    {this->onRecieveSignal(count);});
+                                        
     _rawSignal.start();
 }
 
 cocos2d::spritebuilder::ccReaderClickCallback MainScene::onResolveCCBClickSelector(const std::string &selectorName, cocos2d::Node* node)
 {
-    //CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "settings", MainScene::onSettings);
+    CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "pause", MainScene::onPause);
+    CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "resume", MainScene::onResume);
     return nullptr;
 }
 
 bool MainScene::onAssignCCBMemberVariable(const std::string &memberVariableName, cocos2d::Node* node)
 {
-    //CCBX_MEMBERVARIABLEASSIGNER_GLUE("garage_new_item",_garage_new_item);
+    CCBX_MEMBERVARIABLEASSIGNER_GLUE("count", _count);
+    CCBX_MEMBERVARIABLEASSIGNER_GLUE("pause", _pause);
+    
     return true;
 }
 
+void MainScene::onRecieveSignal(long long count)
+{
+    _count->setString(std::to_string(count));
+}
+
+void MainScene::onPause(cocos2d::Ref* target)
+{
+    _rawSignal.pause();
+    _pause->setVisible(false);
+}
+
+void MainScene::onResume(cocos2d::Ref* target)
+{
+    _rawSignal.start();
+    _pause->setVisible(true);
+}
