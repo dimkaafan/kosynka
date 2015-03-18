@@ -15,7 +15,7 @@
 class SignalManager
 {
 public:
-    SignalManager(int bufferCount);
+    SignalManager(int bufferCount, size_t signalSize, float avrDt);
     ~SignalManager();
     void init();
     void start();
@@ -28,13 +28,26 @@ public:
                        UInt32                          inNumberPacketDescriptions,
                        const AudioStreamPacketDescription *inPacketDescs);
     void setOnRecieveFunction(const std::function<void(long long)>& func);
+    const std::vector<SignalDataType>& getAvrSignal() const;
+    SignalDataType getMinY() const;
+    SignalDataType getMaxY() const;
+    float getXTime() const;
+    
 private:
     AudioQueueRef _queue = nullptr;
     int _bufferCount = 16;
-    std::vector<SignalDataType> _rawData;
+    std::vector< std::vector<SignalDataType> > _rawData;
+    std::vector<SignalDataType> _avrData;
+    SignalDataType _minY = 0;
+    SignalDataType _maxY = 0;
+    float _sndBuffLen = 0.2f;// sec
     float _dt = 0;
+    float _adrDt = 0.1f;
     long long _recieveCount = 0;
+    size_t _nextIdx = 0;
     std::function<void(long long)> _onRecieve;
+    
+    void addAvrData(const std::vector<SignalDataType>& source, int buffIdx);
     
 };
 

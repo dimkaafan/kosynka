@@ -16,9 +16,10 @@ class SignalAnalitic
 public:
     SignalAnalitic();
     ~SignalAnalitic();
-    static std::vector<SignalDataType> avarage(const std::vector<SignalDataType>& signal, float delta, float avDelta);
+    static std::vector<SignalDataType> avarage(const std::vector<SignalDataType>& signal, size_t dataCount, float delta, float avDelta);
+    static bool getMinMax(const std::vector<SignalDataType>& signal, SignalDataType& minY, SignalDataType& maxY);
 private:
-    std::vector<SignalDataType> _signal;
+    //std::vector<SignalDataType> _signal;
 };
 
 #endif /* defined(__trapSound__SignalAnalitic__) */

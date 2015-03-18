@@ -20,8 +20,13 @@ public:
     CREATE_FUNC(MainScene);
 private:
     MainScene();
-    cocos2d::Label* _count;
-    cocos2d::Node* _pause;
+    cocos2d::Label* _count = nullptr;
+    cocos2d::Label* _maxY = nullptr;
+    cocos2d::Label* _minY = nullptr;
+    cocos2d::Label* _xTime = nullptr;
+    cocos2d::Node* _pause = nullptr;
+    cocos2d::Node* _node_graphic = nullptr;
+    std::vector<cocos2d::Node*> _points;
     
     virtual cocos2d::spritebuilder::ccReaderClickCallback onResolveCCBClickSelector(const std::string &selectorName, cocos2d::Node* node) override;
     virtual bool onAssignCCBMemberVariable(const std::string &memberVariableName, cocos2d::Node* node) override;
