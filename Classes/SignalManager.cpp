@@ -113,7 +113,7 @@ void SignalManager::audioCallback(
     AudioQueueEnqueueBuffer(_queue, inBuffer, 0, NULL);
     
     auto avrData = SignalAnalitic::avarage(rawBuff, inNumberPacketDescriptions, _dt, _adrDt);
-    //std::fill(_rawData.begin(), _rawData.begin() + inNumberPacketDescriptions , 0);
+    std::fill(rawBuff.begin(), rawBuff.begin() + inNumberPacketDescriptions , 0);
 
     addAvrData(avrData, buffIdx);
     

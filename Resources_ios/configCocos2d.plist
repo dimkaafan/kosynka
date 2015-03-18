@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CCSetupDesignResourceScale</key>
+	<real>2</real>
+	<key>CCSetupDesignSizeHeight</key>
+	<integer>960</integer>
+	<key>CCSetupDesignSizeWidth</key>
+	<integer>640</integer>
+	<key>CCSetupScreenMode</key>
+	<string>CCScreenModeFlexible</string>
+	<key>CCSetupScreenOrientation</key>
+	<string>CCScreenOrientationPortrait</string>
+	<key>CCSetupTabletScale2X</key>
+	<true/>
+</dict>
+</plist>
