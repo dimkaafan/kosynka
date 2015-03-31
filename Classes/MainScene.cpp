@@ -1,13 +1,12 @@
 #include <CoreAudio/CoreAudioTypes.h>
+#include <math.h>
 //#include "GameHelper/AndroidFix.h"
 #include "MainScene.h"
 #include "SignalTypes.h"
 
 const int AUDIO_BUFFERS = 16;
-const size_t BUFFER_SIZE = 1024;
+const size_t BUFFER_SIZE = 2048;
 
-static std::random_device rd;
-static std::default_random_engine randomEngine(rd());
 
 std::string floatToStr(float val)
 {
@@ -66,18 +65,15 @@ bool MainScene::init()
     auto bbox = _node_graphic->getBoundingBox();
     cocos2d::spritebuilder::CCBXReader *pointreader = cocos2d::spritebuilder::CCBXReader::createFromFile("Interface/dataPoint.ccbi");
     _points.reserve(BUFFER_SIZE);
-    std::uniform_int_distribution<int> rndX(0, bbox.size.width-1);
-    std::uniform_int_distribution<int> rndY(0, bbox.size.height-1);
     for(size_t i = 0; i < BUFFER_SIZE; i++)
     {
         cocos2d::Node * node = pointreader->createNode(this);
-        auto pos = cocos2d::Vec2(rndX(randomEngine), rndY(randomEngine));
-        node->setPosition(pos);
         _node_graphic->addChild(node);
         _points.push_back(node);
     }
     
     initAudio();
+    drawAxis(_node_graphic);
     
     return true;
 }
@@ -107,7 +103,8 @@ bool MainScene::onAssignCCBMemberVariable(const std::string &memberVariableName,
 {
     CCBX_MEMBERVARIABLEASSIGNER_GLUE("count", _count);
     CCBX_MEMBERVARIABLEASSIGNER_GLUE("pause", _pause);
-    CCBX_MEMBERVARIABLEASSIGNER_GLUE("node_graphic", _node_graphic);
+    CCBX_MEMBERVARIABLEASSIGNER_GLUE("node_signal", _node_graphic);
+    CCBX_MEMBERVARIABLEASSIGNER_GLUE("node_fft", _node_fft);
     
     CCBX_MEMBERVARIABLEASSIGNER_GLUE("maxY", _maxY);
     CCBX_MEMBERVARIABLEASSIGNER_GLUE("minY", _minY);
@@ -119,11 +116,12 @@ bool MainScene::onAssignCCBMemberVariable(const std::string &memberVariableName,
 void MainScene::onRecieveSignal(long long count)
 {
     _count->setString(std::to_string(count));
-    const auto& data = _rawSignal.getAvrSignal();
-    auto sz = _node_graphic->getContentSize();
-
+    size_t startIdx = 0;
+    auto data = _rawSignal.getAvrSignal(startIdx);
     auto minY = _rawSignal.getMinY();
     auto maxY = _rawSignal.getMaxY();
+    
+    auto sz = _node_graphic->getContentSize();
     _maxY->setString(std::to_string(maxY));
     _minY->setString(std::to_string(minY));
     _xTime->setString(floatToStr(_rawSignal.getXTime()));
@@ -136,7 +134,8 @@ void MainScene::onRecieveSignal(long long count)
     {
         auto& dataItem = data.at(i);
         auto pItem = _points.at(i);
-        pItem->setPosition(fx*i, sz.height/2 + fy*dataItem);
+        size_t xIdx = i < startIdx ? i + maxIdx : i;
+        pItem->setPosition(fx*(xIdx - startIdx), sz.height/2 + fy*dataItem);
         pItem->setVisible(true);
     }
     for(auto it = _points.begin() + maxIdx; it != _points.end(); ++it)
@@ -155,4 +154,39 @@ void MainScene::onResume(cocos2d::Ref* target)
 {
     _rawSignal.start();
     _pause->setVisible(true);
+}
+
+void MainScene::drawAxis(cocos2d::Node* node)
+{
+    DrawNode* axisNode =DrawNode::create();
+    auto bbox = node->getBoundingBox();
+    float deltaBreak = 5;
+    //draw x
+    float  x = 0;
+    while(x < bbox.size.width)
+    {
+        axisNode->drawLine(Vec2(x, bbox.size.height/2),Vec2(x + deltaBreak, bbox.size.height/2),Color4F(1,0,0,1));
+        x += 2*deltaBreak;
+    }
+    
+    float xTime = _rawSignal.getXTime();
+    float scX = bbox.size.width/xTime;
+    float pow10 = ::log10f(xTime);
+    if (pow10 > 0)
+        pow10 = static_cast<int>(pow10);
+    else if (pow10 < 0)
+        pow10 = static_cast<int>(pow10 - 1.f);
+    pow10 = ::powf(10.f, pow10);
+    int maxX = ceil(xTime/pow10);
+    scX *= pow10;
+    for(int i = 0; i < maxX; i++)
+    {
+        float y = 0;
+        while (y < bbox.size.height)
+        {
+            axisNode->drawLine(Vec2(i*scX, y), Vec2(i*scX, y + deltaBreak), Color4F(1,0,0,1));
+            y += 2*deltaBreak;
+        }
+    }
+    _node_graphic->addChild(axisNode);
 }

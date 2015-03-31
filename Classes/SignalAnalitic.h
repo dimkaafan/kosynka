@@ -9,15 +9,20 @@
 #ifndef __trapSound__SignalAnalitic__
 #define __trapSound__SignalAnalitic__
 
+#include <vector>
 #include "SignalTypes.h"
 
+typedef std::vector<SignalDataType> Signal;
+typedef std::vector<SpectrItem> Spectr;
 class SignalAnalitic
 {
 public:
     SignalAnalitic();
     ~SignalAnalitic();
-    static std::vector<SignalDataType> avarage(const std::vector<SignalDataType>& signal, size_t dataCount, float delta, float avDelta);
-    static bool getMinMax(const std::vector<SignalDataType>& signal, SignalDataType& minY, SignalDataType& maxY);
+    static Signal avarage(const Signal& signal, size_t dataCount, float delta, float avDelta);
+    static size_t avarage(const Signal& signal, size_t dataCount, float deltaTime, float avDelta, Signal& dest, size_t destIdx);
+    static bool getMinMax(const Signal& signal, SignalDataType& minY, SignalDataType& maxY);
+    static Spectr FFT(Signal& signal, float deltaTime);
 private:
     //std::vector<SignalDataType> _signal;
 };

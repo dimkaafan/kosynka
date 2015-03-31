@@ -8,67 +8,81 @@
 
 #include "SignalAnalitic.h"
 
-static int s_maxZro = 0;
-
 std::vector<SignalDataType> SignalAnalitic::avarage(const std::vector<SignalDataType>& signal, size_t dataCount, float delta, float avDelta)
 {
-    float duration = signal.size()*delta;
-    std::vector<SignalDataType> res(static_cast<size_t>(duration/avDelta + 0.5f), 0);
+    std::vector<SignalDataType> res;
+    size_t avrCount = ceil(dataCount*(double)delta/(double)avDelta);
+    res.reserve(avrCount);
     
-    float dInt = avDelta/delta;
     float idx = 0;
     long sum = 0;
     size_t sumCount = 0;
-    size_t resIdx = 0;
-    size_t zeroCount = 0;
-    std::vector<int> zeroStat;
-    auto itEnd = signal.begin() +  std::max(dataCount, signal.size());
+    auto itEnd = signal.begin() +  std::min(dataCount, signal.size());
     for(auto it = signal.begin(); it != itEnd; ++it)
     {
-        if (*it == 0)
-            zeroCount++;
-        else
-        {
-            if (zeroCount > 2)
-            {
-                zeroStat.push_back(zeroCount);
-                zeroCount = 0;
-            }
-        }
-        
-        if (idx < dInt)
+        idx += delta;
+        if (idx < avDelta)
         {
             sum += *it;
-            idx++;
-            sumCount++;
+            sumCount += 1;
         }
         else
         {
-            res[resIdx] = sum/sumCount;
-            idx -= dInt;
-            resIdx++;
-            sumCount = 0;
-            sum = 0;
+            auto dy = *it - *(it-1);
+            idx -= avDelta;
+            sum += static_cast<long>(dy*(1.f - idx));
+            res.push_back(sum/sumCount);
+            
+            sumCount = idx;
+            sum = static_cast<long>(dy*idx);
+        }
+    }
+    if (sumCount != 0)
+        res.push_back(sum/sumCount);
+    return res;
+}
+
+size_t SignalAnalitic::avarage(const std::vector<SignalDataType>& signal, size_t dataCount, float delta, float avDelta, std::vector<SignalDataType>& dest, size_t destIdx)
+{
+    size_t avrCount = ceil(dataCount*(double)delta/(double)avDelta);
+    size_t destSize = dest.size();
+    
+    float idx = 0;
+    long sum = 0;
+    size_t sumCount = 0;
+    auto itEnd = signal.begin() +  std::min(dataCount, signal.size());
+    for(auto it = signal.begin(); it != itEnd; ++it)
+    {
+        idx += delta;
+        if (idx < avDelta)
+        {
+            sum += *it;
+            sumCount += 1;
+        }
+        else
+        {
+            auto dy = *it - *(it-1);
+            idx -= avDelta;
+            sum += static_cast<long>(dy*(1.f - idx));
+            dest[destIdx] = sum/sumCount;
+            destIdx++;
+            if (destSize == destIdx)
+                destIdx = 0;
+            
+            sumCount = idx;
+            sum = static_cast<long>(dy*idx);
         }
     }
     if (sumCount != 0)
     {
-        res[resIdx] = sum/sumCount;
+        dest[destIdx] = sum/sumCount;
+        destIdx++;
+        if (destSize == destIdx)
+            destIdx = 0;
     }
-    
-    if (!zeroStat.empty())
-    {
-        int all = 0;
-        auto it = std::max_element(zeroStat.begin(), zeroStat.end());
-        if (it != zeroStat.end() && *it > s_maxZro)
-            s_maxZro = *it;
-        for(auto& item : zeroStat)
-            all += item;
-        if (all*100.f/signal.size() > 80.f)
-            return std::vector<SignalDataType>(0);
-    }
-    
-    return std::move(res);
+
+    return destIdx;
+
 }
 
 bool SignalAnalitic::getMinMax(const std::vector<SignalDataType>& signal, SignalDataType& minY, SignalDataType& maxY)
@@ -84,4 +98,10 @@ bool SignalAnalitic::getMinMax(const std::vector<SignalDataType>& signal, Signal
             minY = item;
     }
     return true;
+}
+
+Spectr SignalAnalitic::FFT(Signal& signal, float deltaTime)
+{
+    Spectr res;
+    return res;
 }

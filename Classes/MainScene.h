@@ -26,6 +26,7 @@ private:
     cocos2d::Label* _xTime = nullptr;
     cocos2d::Node* _pause = nullptr;
     cocos2d::Node* _node_graphic = nullptr;
+    cocos2d::Node* _node_fft = nullptr;
     std::vector<cocos2d::Node*> _points;
     
     virtual cocos2d::spritebuilder::ccReaderClickCallback onResolveCCBClickSelector(const std::string &selectorName, cocos2d::Node* node) override;
@@ -35,6 +36,7 @@ private:
     void onResume(cocos2d::Ref* target);
     
     void onRecieveSignal(long long);
+    void drawAxis(cocos2d::Node* node);
     
     SignalManager _rawSignal;
 };

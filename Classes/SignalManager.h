@@ -28,7 +28,7 @@ public:
                        UInt32                          inNumberPacketDescriptions,
                        const AudioStreamPacketDescription *inPacketDescs);
     void setOnRecieveFunction(const std::function<void(long long)>& func);
-    const std::vector<SignalDataType>& getAvrSignal() const;
+    const std::vector<SignalDataType>& getAvrSignal(size_t& startIdx) const;
     SignalDataType getMinY() const;
     SignalDataType getMaxY() const;
     float getXTime() const;
@@ -42,7 +42,7 @@ private:
     SignalDataType _maxY = 0;
     float _sndBuffLen = 0.2f;// sec
     float _dt = 0;
-    float _adrDt = 0.1f;
+    float _adrDt = 0.001f;
     long long _recieveCount = 0;
     size_t _nextIdx = 0;
     std::function<void(long long)> _onRecieve;

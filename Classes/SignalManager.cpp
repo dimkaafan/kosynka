@@ -66,12 +66,12 @@ void SignalManager::init()
     
     if (queue)
     {
-        unsigned long frameSize = ceil(_sndBuffLen*mDataFormat.mSampleRate * mDataFormat.mBytesPerFrame);
+        unsigned long frameSize = ceil(_sndBuffLen*mDataFormat.mSampleRate);
         std::vector<AudioQueueBufferRef> aBuffers(_bufferCount, nullptr);
 
         for (size_t i=0; i< aBuffers.size(); i++)
         {
-            AudioQueueAllocateBuffer(queue, frameSize, &aBuffers[i]);
+            AudioQueueAllocateBuffer(queue, frameSize* mDataFormat.mBytesPerFrame, &aBuffers[i]);
             aBuffers[i]->mUserData = reinterpret_cast<void*>(i);
             AudioQueueEnqueueBuffer(queue, aBuffers[i], 0, NULL);
             _rawData[i].resize(frameSize);
@@ -112,10 +112,13 @@ void SignalManager::audioCallback(
     memcpy(&rawBuff[0], inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
     AudioQueueEnqueueBuffer(_queue, inBuffer, 0, NULL);
     
-    auto avrData = SignalAnalitic::avarage(rawBuff, inNumberPacketDescriptions, _dt, _adrDt);
+    //auto avrData = SignalAnalitic::avarage(rawBuff, inNumberPacketDescriptions, _dt, _adrDt);
+    //addAvrData(avrData, buffIdx);
+    
+    _nextIdx = SignalAnalitic::avarage(rawBuff, inNumberPacketDescriptions, _dt, _adrDt, _avrData, _nextIdx);
+    SignalAnalitic::getMinMax(_avrData, _minY, _maxY);
+    
     std::fill(rawBuff.begin(), rawBuff.begin() + inNumberPacketDescriptions , 0);
-
-    addAvrData(avrData, buffIdx);
     
     if (_onRecieve)
         _onRecieve(_recieveCount);
@@ -126,8 +129,9 @@ void SignalManager::setOnRecieveFunction(const std::function<void(long long)>& f
     _onRecieve = func;
 }
 
-const std::vector<SignalDataType>& SignalManager::getAvrSignal() const
+const std::vector<SignalDataType>& SignalManager::getAvrSignal(size_t& startIdx) const
 {
+    startIdx = _nextIdx;
     return _avrData;
 }
 
@@ -164,41 +168,14 @@ void SignalManager::addAvrData(const std::vector<SignalDataType>& source, int bu
 //            deltaSource = source.size() - sourceIdx;
 //        }
 //    }
-    
-    int zeroCount = 0;
-    std::vector<int> zeroStat;
+
     size_t destSize = _avrData.size();
     for(auto& item : source)
     {
-        if (item == 0)
-        {
-            zeroCount++;
-            //continue;
-        }
-        else
-        {
-            if (zeroCount > 0)
-            {
-                zeroStat.emplace_back(zeroCount);
-                zeroCount = 0;
-            }
-        }
-        
         _avrData[_nextIdx] = item;
         _nextIdx++;
         if (_nextIdx >= destSize)
             _nextIdx = 0;
-    }
-    if (!zeroStat.empty())
-    {
-        int all = 0;
-        for(auto& item : zeroStat)
-            all += item;
-        if (all*100.f/source.size() > 80.f)
-        {
-            
-        }
-            
     }
     
     SignalAnalitic::getMinMax(_avrData, _minY, _maxY);
