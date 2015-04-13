@@ -52,6 +52,8 @@
 		BF171245129291EC00B8313A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB012928DE900B8313A /* OpenGLES.framework */; };
 		BF1712471292920000B8313A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB412928DE900B8313A /* libz.dylib */; };
 		BF1C47F01293687400B63C5D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1C47EA1293683800B63C5D /* QuartzCore.framework */; };
+		CEC097E51ACBC66700E2C7CD /* FFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEC097E31ACBC66700E2C7CD /* FFT.cpp */; };
+		CEC097E61ACBC66700E2C7CD /* FFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEC097E31ACBC66700E2C7CD /* FFT.cpp */; };
 		CEEF87471A970E3300369750 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CEEF87461A970E3300369750 /* Images.xcassets */; };
 		CEEF87491A9711A400369750 /* Interface in Resources */ = {isa = PBXBuildFile; fileRef = CEEF87481A9711A400369750 /* Interface */; };
 		CEEF874A1A9711A400369750 /* Interface in Resources */ = {isa = PBXBuildFile; fileRef = CEEF87481A9711A400369750 /* Interface */; };
@@ -155,6 +157,8 @@
 		BF170DB012928DE900B8313A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		BF170DB412928DE900B8313A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		BF1C47EA1293683800B63C5D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		CEC097E31ACBC66700E2C7CD /* FFT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFT.cpp; path = fft/FFT.cpp; sourceTree = "<group>"; };
+		CEC097E41ACBC66700E2C7CD /* FFT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FFT.h; path = fft/FFT.h; sourceTree = "<group>"; };
 		CEEF87461A970E3300369750 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = "trapSound iOS/Images.xcassets"; sourceTree = SOURCE_ROOT; };
 		CEEF87481A9711A400369750 /* Interface */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Interface; sourceTree = "<group>"; };
 		CEEF875E1A9DD8F400369750 /* configCocos2d.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = configCocos2d.plist; sourceTree = "<group>"; };
@@ -300,6 +304,7 @@
 		46880B8319C43A87006E1F66 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				CEC097E21ACBC62D00E2C7CD /* fft */,
 				46880B8419C43A87006E1F66 /* AppDelegate.cpp */,
 				46880B8519C43A87006E1F66 /* AppDelegate.h */,
 				46880B8619C43A87006E1F66 /* MainScene.cpp */,
@@ -361,6 +366,15 @@
 			name = Icons;
 			path = ios;
 			sourceTree = SOURCE_ROOT;
+		};
+		CEC097E21ACBC62D00E2C7CD /* fft */ = {
+			isa = PBXGroup;
+			children = (
+				CEC097E31ACBC66700E2C7CD /* FFT.cpp */,
+				CEC097E41ACBC66700E2C7CD /* FFT.h */,
+			);
+			name = fft;
+			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
@@ -515,6 +529,7 @@
 				CEEF87771A9E01BB00369750 /* SignalManager.cpp in Sources */,
 				CEEF876C1A9DFFD400369750 /* SignalAnalitic.cpp in Sources */,
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
+				CEC097E51ACBC66700E2C7CD /* FFT.cpp in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
 			);
@@ -524,6 +539,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CEC097E61ACBC66700E2C7CD /* FFT.cpp in Sources */,
 				46880B8919C43A87006E1F66 /* AppDelegate.cpp in Sources */,
 				503AE10517EB98FF00D1A890 /* main.cpp in Sources */,
 				CEEF876D1A9DFFD400369750 /* SignalAnalitic.cpp in Sources */,

@@ -4,7 +4,6 @@
 #include "MainScene.h"
 #include "SignalTypes.h"
 
-const int AUDIO_BUFFERS = 16;
 const size_t BUFFER_SIZE = 2048;
 
 
@@ -26,11 +25,10 @@ std::string floatToStr(float val)
 
 USING_NS_CC;
 
-MainScene::MainScene(): _rawSignal(AUDIO_BUFFERS, BUFFER_SIZE, 0.0001f)
+MainScene::MainScene(): _rawSignal(BUFFER_SIZE, 0.0001f, _xTimeSec)
 ,_count(nullptr)
 ,_pause(nullptr)
 {
-
 }
 
 Scene* MainScene::createScene()
@@ -70,6 +68,9 @@ bool MainScene::init()
         cocos2d::Node * node = pointreader->createNode(this);
         _node_graphic->addChild(node);
         _points.push_back(node);
+        cocos2d::Node * nodeSpectr = pointreader->createNode(this);
+        _node_fft->addChild(nodeSpectr);
+        _spectrPoints.push_back(nodeSpectr);
     }
     
     initAudio();
@@ -96,6 +97,8 @@ cocos2d::spritebuilder::ccReaderClickCallback MainScene::onResolveCCBClickSelect
 {
     CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "pause", MainScene::onPause);
     CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "resume", MainScene::onResume);
+    CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "xtime_up2", MainScene::onXTimeUp2);
+    CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "xtime_down2", MainScene::onXTimeDown2);
     return nullptr;
 }
 
@@ -116,8 +119,15 @@ bool MainScene::onAssignCCBMemberVariable(const std::string &memberVariableName,
 void MainScene::onRecieveSignal(long long count)
 {
     _count->setString(std::to_string(count));
+    drawSignal();
+    drawSpectr();
+}
+
+void MainScene::drawSignal()
+{
     size_t startIdx = 0;
     auto data = _rawSignal.getAvrSignal(startIdx);
+    
     auto minY = _rawSignal.getMinY();
     auto maxY = _rawSignal.getMaxY();
     
@@ -126,22 +136,71 @@ void MainScene::onRecieveSignal(long long count)
     _minY->setString(std::to_string(minY));
     _xTime->setString(floatToStr(_rawSignal.getXTime()));
     
-    float fx = sz.width/data.size();
-    
+    float pointTime = _rawSignal.getTimeInPoint();
+    float pow10 = ::log10f(pointTime);
+    if (pow10 > 0)
+        pow10 = static_cast<int>(pow10);
+    else if (pow10 < 0)
+        pow10 = static_cast<int>(pow10 - 1.f);
+
+    std::string pref = "";
+    if (pow10 > -6)
+    {
+        pow10 = 3;
+        pref = " ms";
+        pointTime *= ::powf(10.f, pow10);
+    }
+    std::string timeStr = _xTime->getString();
+    timeStr += "(" + floatToStr(pointTime) + pref + ")";
+    _xTime->setString(timeStr);
+
+
+    float fx = sz.width/(data.size()*_signalWin.width);
     float fy = (maxY - minY) > 0 ? sz.height/2/(maxY - minY) : 0;
     size_t maxIdx = std::max(data.size(), _points.size());
+    size_t minSignalIdx = static_cast<size_t>(roundf(data.size()*_signalWin.start));
+    size_t maxSignalIdx = minSignalIdx + static_cast<size_t>(roundf(data.size()*_signalWin.width));
+    
     for(size_t i = 0; i < maxIdx; i++)
     {
-        auto& dataItem = data.at(i);
-        auto pItem = _points.at(i);
         size_t xIdx = i < startIdx ? i + maxIdx : i;
-        pItem->setPosition(fx*(xIdx - startIdx), sz.height/2 + fy*dataItem);
-        pItem->setVisible(true);
+        xIdx -= startIdx;
+        auto pItem = _points.at(i);
+        if (xIdx >= minSignalIdx && xIdx < maxSignalIdx)
+        {
+            auto& dataItem = data.at(i);
+            pItem->setPosition(fx*(xIdx - minSignalIdx) , sz.height/2 + fy*dataItem);
+            pItem->setVisible(true);
+        }
+        else
+            pItem->setVisible(false);
     }
     for(auto it = _points.begin() + maxIdx; it != _points.end(); ++it)
     {
         (*it)->setVisible(false);
     }
+}
+
+void MainScene::drawSpectr()
+{
+    const auto& spectr = _rawSignal.getSpectr();
+    auto sz = _node_fft->getContentSize();
+    
+    float fx = sz.width/spectr.data.size();
+    float fy = (spectr.maxAmplutide - spectr.minAmplutide) > 0 ? sz.height/(spectr.maxAmplutide - spectr.minAmplutide) : 0;
+    size_t maxIdx = spectr.data.size();
+    for(size_t i = 0; i < maxIdx; i++)
+    {
+        auto& dataItem = spectr.data.at(i);
+        auto pItem = _spectrPoints.at(i);
+        pItem->setPosition(fx*i, fy*dataItem.re);
+        pItem->setVisible(true);
+    }
+    for(auto it = _spectrPoints.begin() + maxIdx; it != _spectrPoints.end(); ++it)
+    {
+        (*it)->setVisible(false);
+    }
+
 }
 
 void MainScene::onPause(cocos2d::Ref* target)
@@ -154,6 +213,18 @@ void MainScene::onResume(cocos2d::Ref* target)
 {
     _rawSignal.start();
     _pause->setVisible(true);
+}
+
+void MainScene::onXTimeUp2(cocos2d::Ref* target)
+{
+    _xTimeSec *= 2.f;
+    _rawSignal.setXTime(_xTimeSec);
+}
+
+void MainScene::onXTimeDown2(cocos2d::Ref* target)
+{
+    _xTimeSec /= 2.f;
+    _rawSignal.setXTime(_xTimeSec);
 }
 
 void MainScene::drawAxis(cocos2d::Node* node)

@@ -11,9 +11,19 @@
 
 #include <vector>
 #include "SignalTypes.h"
+#include "FFT.h"
 
 typedef std::vector<SignalDataType> Signal;
-typedef std::vector<SpectrItem> Spectr;
+typedef std::vector<ShortComplex> SpectrData;
+
+struct Spectr
+{
+    SpectrData data;
+    double maxAmplutide;
+    double minAmplutide;
+    double deltaFreq;
+};
+
 class SignalAnalitic
 {
 public:
@@ -22,7 +32,7 @@ public:
     static Signal avarage(const Signal& signal, size_t dataCount, float delta, float avDelta);
     static size_t avarage(const Signal& signal, size_t dataCount, float deltaTime, float avDelta, Signal& dest, size_t destIdx);
     static bool getMinMax(const Signal& signal, SignalDataType& minY, SignalDataType& maxY);
-    static Spectr FFT(Signal& signal, float deltaTime);
+    static void FFT(const Signal& signal, size_t startIdx, float deltaTime, Spectr& spectr);
 private:
     //std::vector<SignalDataType> _signal;
 };

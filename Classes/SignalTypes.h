@@ -11,11 +11,12 @@
 
 typedef short int SignalDataType;
 
+template <class T>
 struct SpectrItem
 {
-    float frequency;
-    float amplitude;
-    float phase;
+//    T frequency;
+    T amplitude;
+    T phase;
 };
 
 #endif /* defined(__trapSound__SignalTypes__) */
