@@ -5,10 +5,30 @@
 #include "spritebuilder/SpriteBuilder.h"
 #include "SignalManager.h"
 
-struct SignalWindow
+class SignalWindow
 {
-    float start;// percent
-    float width;// percent
+public:
+    float _start;// percent
+    float _width;// percent
+    float _widthMin;
+    SignalWindow(float start, float width, float widthMin):_start(start), _width(width), _widthMin(widthMin){}
+    void shiftPos(float delta)
+    {
+        _start += delta;
+        if (_start < 0.f)
+            _start = 0.f;
+        else if (_start + _width > 1.f)
+            _start = 1.f - _width;
+    }
+    void changeWidth(float delta)
+    {
+        _width += delta;
+        if (_width > 1.f)
+            _width = 1.f;
+        else if ( _width < _widthMin)
+            _width = _widthMin;
+        _start = 1.f - _width;
+    }
 };
 
 class MainScene : public cocos2d::Node, public cocos2d::spritebuilder::CCBXReaderOwner
@@ -30,14 +50,18 @@ private:
     cocos2d::Label* _maxY = nullptr;
     cocos2d::Label* _minY = nullptr;
     cocos2d::Label* _xTime = nullptr;
+    cocos2d::Label* _max_frequency = nullptr;
     cocos2d::Node* _pause = nullptr;
     cocos2d::Node* _node_graphic = nullptr;
     cocos2d::Node* _node_fft = nullptr;
+    cocos2d::Node* _scrollNode = nullptr;
+    
     std::vector<cocos2d::Node*> _points;
     std::vector<cocos2d::Node*> _spectrPoints;
+    cocos2d::EventListener* _listener = nullptr;
     
     float _xTimeSec = 0.2f;
-    SignalWindow _signalWin={0.0f, 1.f};
+    SignalWindow _signalWin=SignalWindow(0.0f, 1.f, 0.1f);
     
     virtual cocos2d::spritebuilder::ccReaderClickCallback onResolveCCBClickSelector(const std::string &selectorName, cocos2d::Node* node) override;
     virtual bool onAssignCCBMemberVariable(const std::string &memberVariableName, cocos2d::Node* node) override;
@@ -46,12 +70,26 @@ private:
     void onResume(cocos2d::Ref* target);
     void onXTimeUp2(cocos2d::Ref* target);
     void onXTimeDown2(cocos2d::Ref* target);
+    void onXWinUp(cocos2d::Ref* target);
+    void onXWinDown(cocos2d::Ref* target);
+    
+    bool onTouchBegan(cocos2d::Touch*, cocos2d::Event*);
+    void onTouchMoved(cocos2d::Touch*, cocos2d::Event*);
+    void onTouchEnded(cocos2d::Touch*, cocos2d::Event*);
+    void onTouchCancelled(cocos2d::Touch*, cocos2d::Event*);
+    
+    void onTouchesBegan(const std::vector<cocos2d::Touch*>&, cocos2d::Event*);
+    void onTouchesMoved(const std::vector<cocos2d::Touch*>&, cocos2d::Event*);
+    void onTouchesEnded(const std::vector<cocos2d::Touch*>&, cocos2d::Event*);
+    void onTouchesCancelled(const std::vector<cocos2d::Touch*>&, cocos2d::Event*);
     
     void onRecieveSignal(long long);
     void drawAxis(cocos2d::Node* node);
     
     void drawSignal();
     void drawSpectr();
+    
+    void updateFrequency();
     
     SignalManager _rawSignal;
 };

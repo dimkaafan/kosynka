@@ -35,12 +35,13 @@ SignalManager::SignalManager(size_t signalSize, float timePoint, float xTime):
 _queue(nullptr)
 ,_bufferCount(AUDIO_BUFFERS)
 ,_onRecieve(nullptr)
-,_avrData(signalSize,0)
-,_pointTime(timePoint)
+,_avrData(signalSize)
+,_timeInPointSec(timePoint)
 ,_rawData(AUDIO_BUFFERS)
 ,_sndBuffLen(xTime)
 {
-    
+    _maxFrequency = 0.5f/_timeInPointSec;
+    _minFrequency = 1.f/(_avrData.size()*_timeInPointSec);
 }
 
 SignalManager::~SignalManager()
@@ -84,14 +85,21 @@ void SignalManager::init()
 
 void SignalManager::start()
 {
+     _isPaused = false;
     if (_queue)
         AudioQueueStart(_queue, NULL);
 }
 
 void SignalManager::pause()
 {
+    _isPaused = true;
     if (_queue)
         AudioQueuePause(_queue);//AudioQueueStop, true
+}
+
+bool SignalManager::isPaused() const
+{
+    return _isPaused;
 }
 
 void SignalManager::setSoundBuffTime(float timeSec)
@@ -105,31 +113,39 @@ void SignalManager::setSoundBuffTime(float timeSec)
     start();
 }
 
-void SignalManager::setTimeInPoint(float pointTime)
+bool SignalManager::setTimeInPoint(float pointTime)
 {
+    float prop = pointTime/_dt;
+    if (prop <= 1.5f)
+        return false;
+    _timeInPointSec = pointTime;
+    _maxFrequency = 0.5f/_timeInPointSec;
+    _minFrequency = 1.f/(_avrData.size()*_timeInPointSec);
     AudioQueueStop(_queue, true);
     AudioQueueDispose(_queue, true);
     _queue = nullptr;
-    std::fill(_avrData.begin(), _avrData.end(), 0);
-    _nextIdx = 0;
+    _avrData.clearData();
     s_signals.erase(this);
     
-    _pointTime = pointTime;
-    float prop = _pointTime/_dt;
-    if (prop <= 1.5f)
-        _pointTime = _dt;
+    
     init();
     start();
+    return true;
 }
 
 float SignalManager::getTimeInPoint() const
 {
-    return _pointTime;
+    return _timeInPointSec;
 }
 
-void SignalManager::setXTime(float xTime)
+std::pair<float, float> SignalManager::getFrequencyGap() const
 {
-    setTimeInPoint(xTime/_avrData.size());
+    return std::make_pair(_minFrequency, _maxFrequency);
+}
+
+bool SignalManager::setXTime(float xTime)
+{
+    return setTimeInPoint(xTime/_avrData.size());
 }
 
 void SignalManager::audioCallback(
@@ -150,10 +166,17 @@ void SignalManager::audioCallback(
     memcpy(&rawBuff[0], inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
     AudioQueueEnqueueBuffer(_queue, inBuffer, 0, NULL);
     
+#if 1
+    SignalAnalitic::avarage(rawBuff, inNumberPacketDescriptions, _dt, _timeInPointSec, _avrData);
+#else
+    float periods = 10;
+    SignalAnalitic::testSignal(periods, 0.f, 100.f, _avrData);
+    float freq = periods/(_timeInPointSec*_avrData.size());
+    _nextIdx = 0;
+#endif
     
-    _nextIdx = SignalAnalitic::avarage(rawBuff, inNumberPacketDescriptions, _dt, _pointTime, _avrData, _nextIdx);
-    SignalAnalitic::getMinMax(_avrData, _minY, _maxY);
-    SignalAnalitic::FFT(_avrData, _nextIdx, _pointTime, _spectr);
+    SignalAnalitic::getMinMax(_avrData.data, _minY, _maxY);
+    SignalAnalitic::FFT(_avrData.data, _avrData.pos, _timeInPointSec, _spectr);
     
     std::fill(rawBuff.begin(), rawBuff.begin() + inNumberPacketDescriptions , 0);
     
@@ -166,9 +189,8 @@ void SignalManager::setOnRecieveFunction(const std::function<void(long long)>& f
     _onRecieve = func;
 }
 
-const std::vector<SignalDataType>& SignalManager::getAvrSignal(size_t& startIdx) const
+const RoundBuff& SignalManager::getAvrSignal() const
 {
-    startIdx = _nextIdx;
     return _avrData;
 }
 
@@ -189,16 +211,16 @@ SignalDataType SignalManager::getMaxY() const
 
 float SignalManager::getXTime() const
 {
-    return _pointTime*_avrData.size();
+    return _timeInPointSec*_avrData.size();
 }
 
 void SignalManager::addAvrData(const std::vector<SignalDataType>& source, int buffIdx)
 {
-    size_t delta = _avrData.size() - _nextIdx;
-    size_t sourceIdx = 0;
-    if (source.size() > _avrData.size())
-        sourceIdx = source.size() - _avrData.size();
-    size_t deltaSource = source.size() - sourceIdx;
+    size_t delta = _avrData.size() - _avrData.pos;
+   // size_t sourceIdx = 0;
+   // if (source.size() > _avrData.size())
+   //     sourceIdx = source.size() - _avrData.size();
+   // size_t deltaSource = source.size() - sourceIdx;
     
 //    while (deltaSource > 0)
 //    {
@@ -211,14 +233,8 @@ void SignalManager::addAvrData(const std::vector<SignalDataType>& source, int bu
 //        }
 //    }
 
+    _avrData.addData(source);
     size_t destSize = _avrData.size();
-    for(auto& item : source)
-    {
-        _avrData[_nextIdx] = item;
-        _nextIdx++;
-        if (_nextIdx >= destSize)
-            _nextIdx = 0;
-    }
     
-    SignalAnalitic::getMinMax(_avrData, _minY, _maxY);
+    SignalAnalitic::getMinMax(_avrData.data, _minY, _maxY);
 }

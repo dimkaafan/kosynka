@@ -73,6 +73,24 @@ bool MainScene::init()
         _spectrPoints.push_back(nodeSpectr);
     }
     
+#if 1
+    auto dispatcher = cocos2d::Director::getInstance()->getEventDispatcher();
+    auto touchListener = cocos2d::EventListenerTouchOneByOne::create();
+    touchListener->onTouchBegan = CC_CALLBACK_2(MainScene::onTouchBegan, this);
+    touchListener->onTouchMoved = CC_CALLBACK_2(MainScene::onTouchMoved, this);
+    touchListener->onTouchEnded = CC_CALLBACK_2(MainScene::onTouchEnded, this);
+    touchListener->onTouchCancelled = CC_CALLBACK_2(MainScene::onTouchCancelled, this);
+    dispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
+    _listener = touchListener;
+#else
+    auto touchesListener = cocos2d::EventListenerTouchAllAtOnce::create();
+    touchesListener->onTouchesBegan = CC_CALLBACK_2(MainScene::onTouchesBegan, this);
+    touchesListener->onTouchesMoved = CC_CALLBACK_2(MainScene::onTouchesMoved, this);
+    touchesListener->onTouchesEnded = CC_CALLBACK_2(MainScene::onTouchesEnded, this);
+    touchesListener->onTouchesCancelled = CC_CALLBACK_2(MainScene::onTouchesCancelled, this);
+    dispatcher->addEventListenerWithSceneGraphPriority(touchesListener, this);
+    _listener = touchListener;
+#endif
     initAudio();
     drawAxis(_node_graphic);
     
@@ -81,7 +99,8 @@ bool MainScene::init()
 
 MainScene::~MainScene()
 {
-
+    if (_listener)
+        cocos2d::Director::getInstance()->getEventDispatcher()->removeEventListener(_listener);
 }
 
 void MainScene::initAudio()
@@ -89,8 +108,15 @@ void MainScene::initAudio()
     _rawSignal.init();
     _rawSignal.setOnRecieveFunction([this](long long count)
                                     {this->onRecieveSignal(count);});
-                                        
+    
     _rawSignal.start();
+    updateFrequency();
+}
+
+void MainScene::updateFrequency()
+{
+    auto diap = _rawSignal.getFrequencyGap();
+    _max_frequency->setString(floatToStr(diap.first) + " - " + floatToStr(diap.second));
 }
 
 cocos2d::spritebuilder::ccReaderClickCallback MainScene::onResolveCCBClickSelector(const std::string &selectorName, cocos2d::Node* node)
@@ -99,6 +125,8 @@ cocos2d::spritebuilder::ccReaderClickCallback MainScene::onResolveCCBClickSelect
     CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "resume", MainScene::onResume);
     CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "xtime_up2", MainScene::onXTimeUp2);
     CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "xtime_down2", MainScene::onXTimeDown2);
+    CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "xwin_up", MainScene::onXWinUp);
+    CCBX_SELECTORRESOLVER_CLICK_GLUE(this, "xwin_down", MainScene::onXWinDown);
     return nullptr;
 }
 
@@ -112,6 +140,7 @@ bool MainScene::onAssignCCBMemberVariable(const std::string &memberVariableName,
     CCBX_MEMBERVARIABLEASSIGNER_GLUE("maxY", _maxY);
     CCBX_MEMBERVARIABLEASSIGNER_GLUE("minY", _minY);
     CCBX_MEMBERVARIABLEASSIGNER_GLUE("x_time", _xTime);
+    CCBX_MEMBERVARIABLEASSIGNER_GLUE("max_frequency", _max_frequency);
     
     return true;
 }
@@ -125,8 +154,8 @@ void MainScene::onRecieveSignal(long long count)
 
 void MainScene::drawSignal()
 {
-    size_t startIdx = 0;
-    auto data = _rawSignal.getAvrSignal(startIdx);
+    const auto& signal = _rawSignal.getAvrSignal();
+    
     
     auto minY = _rawSignal.getMinY();
     auto maxY = _rawSignal.getMaxY();
@@ -155,20 +184,20 @@ void MainScene::drawSignal()
     _xTime->setString(timeStr);
 
 
-    float fx = sz.width/(data.size()*_signalWin.width);
+    float fx = sz.width/(signal.data.size()*_signalWin._width);
     float fy = (maxY - minY) > 0 ? sz.height/2/(maxY - minY) : 0;
-    size_t maxIdx = std::max(data.size(), _points.size());
-    size_t minSignalIdx = static_cast<size_t>(roundf(data.size()*_signalWin.start));
-    size_t maxSignalIdx = minSignalIdx + static_cast<size_t>(roundf(data.size()*_signalWin.width));
+    size_t maxIdx = std::max(signal.size(), _points.size());
+    size_t minSignalIdx = static_cast<size_t>(roundf(signal.size()*_signalWin._start));
+    size_t maxSignalIdx = minSignalIdx + static_cast<size_t>(roundf(signal.size()*_signalWin._width));
     
     for(size_t i = 0; i < maxIdx; i++)
     {
-        size_t xIdx = i < startIdx ? i + maxIdx : i;
-        xIdx -= startIdx;
+        size_t xIdx = i < signal.pos ? i + maxIdx : i;
+        xIdx -= signal.pos;
         auto pItem = _points.at(i);
         if (xIdx >= minSignalIdx && xIdx < maxSignalIdx)
         {
-            auto& dataItem = data.at(i);
+            auto& dataItem = signal.data.at(i);
             pItem->setPosition(fx*(xIdx - minSignalIdx) , sz.height/2 + fy*dataItem);
             pItem->setVisible(true);
         }
@@ -186,14 +215,15 @@ void MainScene::drawSpectr()
     const auto& spectr = _rawSignal.getSpectr();
     auto sz = _node_fft->getContentSize();
     
-    float fx = sz.width/spectr.data.size();
-    float fy = (spectr.maxAmplutide - spectr.minAmplutide) > 0 ? sz.height/(spectr.maxAmplutide - spectr.minAmplutide) : 0;
-    size_t maxIdx = spectr.data.size();
+    float indent = 10.f;
+    size_t maxIdx = spectr.data.size()/2;
+    float fx = (sz.width - 2*indent)/maxIdx;
+    float fy = (spectr.maxAmplutide - spectr.minAmplutide) > 0 ? (sz.height - 2*indent)/(spectr.maxAmplutide - spectr.minAmplutide) : 0;
     for(size_t i = 0; i < maxIdx; i++)
     {
         auto& dataItem = spectr.data.at(i);
         auto pItem = _spectrPoints.at(i);
-        pItem->setPosition(fx*i, fy*dataItem.re);
+        pItem->setPosition(fx*i + indent, fy*dataItem.re + indent);
         pItem->setVisible(true);
     }
     for(auto it = _spectrPoints.begin() + maxIdx; it != _spectrPoints.end(); ++it)
@@ -217,14 +247,94 @@ void MainScene::onResume(cocos2d::Ref* target)
 
 void MainScene::onXTimeUp2(cocos2d::Ref* target)
 {
-    _xTimeSec *= 2.f;
-    _rawSignal.setXTime(_xTimeSec);
+    if (_rawSignal.setXTime(_xTimeSec*2.f))
+    {
+        _xTimeSec *= 2.f;
+        updateFrequency();
+    }
 }
 
 void MainScene::onXTimeDown2(cocos2d::Ref* target)
 {
-    _xTimeSec /= 2.f;
-    _rawSignal.setXTime(_xTimeSec);
+    if (_rawSignal.setXTime(_xTimeSec/2.f))
+    {
+        _xTimeSec /= 2.f;
+        updateFrequency();
+    }
+}
+
+void MainScene::onXWinUp(cocos2d::Ref* target)
+{
+    _signalWin.changeWidth(0.1f);
+    if (_rawSignal.isPaused())
+        drawSignal();
+}
+
+void MainScene::onXWinDown(cocos2d::Ref* target)
+{
+    _signalWin.changeWidth(-0.1f);
+    if (_rawSignal.isPaused())
+        drawSignal();
+}
+
+bool MainScene::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event*)
+{
+    cocos2d::Rect bbox = _node_graphic->getBoundingBox();
+    bbox.origin.set(0, 0);
+    if (bbox.containsPoint(_node_graphic->convertTouchToNodeSpace(touch)))
+    {
+        _scrollNode = _node_graphic;
+        return true;
+    }
+    bbox = _node_fft->getBoundingBox();
+    bbox.origin.set(0, 0);
+    if (bbox.containsPoint(_node_fft->convertTouchToNodeSpace(touch)))
+    {
+        _scrollNode = _node_fft;
+        return true;
+    }
+    return false;
+}
+
+void MainScene::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event*)
+{
+    if (_scrollNode)
+    {
+        auto cs = _scrollNode->getContentSize();
+        _signalWin.shiftPos(-touch->getDelta().x/cs.width);
+        if (_rawSignal.isPaused())
+            drawSignal();
+    }
+}
+
+void MainScene::onTouchEnded(cocos2d::Touch*, cocos2d::Event*)
+{
+    _scrollNode = nullptr;
+}
+
+void MainScene::onTouchCancelled(cocos2d::Touch*, cocos2d::Event*)
+{
+    _scrollNode = nullptr;
+}
+
+void MainScene::onTouchesBegan(const std::vector<cocos2d::Touch*>&, cocos2d::Event*)
+{
+    
+}
+
+void MainScene::onTouchesMoved(const std::vector<cocos2d::Touch*>&, cocos2d::Event*)
+{
+    
+}
+
+void MainScene::onTouchesEnded(const std::vector<cocos2d::Touch*>&, cocos2d::Event*)
+{
+    
+}
+
+void MainScene::onTouchesCancelled(const std::vector<cocos2d::Touch*>&, cocos2d::Event*)
+{
+    
 }
 
 void MainScene::drawAxis(cocos2d::Node* node)

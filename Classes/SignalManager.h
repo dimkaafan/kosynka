@@ -23,6 +23,8 @@ public:
     
     void start();
     void pause();
+    bool isPaused() const;
+    
     void audioCallback(
                        void *                          inUserData,
                        AudioQueueRef                   inAQ,
@@ -31,29 +33,33 @@ public:
                        UInt32                          inNumberPacketDescriptions,
                        const AudioStreamPacketDescription *inPacketDescs);
     void setOnRecieveFunction(const std::function<void(long long)>& func);
-    const Signal& getAvrSignal(size_t& startIdx) const;
+    const RoundBuff& getAvrSignal() const;
     const Spectr& getSpectr() const;
     SignalDataType getMinY() const;
     SignalDataType getMaxY() const;
     float getXTime() const;
     void setSoundBuffTime(float timeSec);
-    void setTimeInPoint(float pointTime);
+    bool setTimeInPoint(float pointTime);
     float getTimeInPoint() const;
-    void setXTime(float xTime);
+    std::pair<float, float> getFrequencyGap() const;
+    bool setXTime(float xTime);
     
 private:
     AudioQueueRef _queue = nullptr;
     int _bufferCount = 16;
     std::vector< Signal > _rawData;
-    Signal _avrData;
+    RoundBuff _avrData;
+    //Signal _avrData;
     Spectr _spectr;
     SignalDataType _minY = 0;
     SignalDataType _maxY = 0;
     float _sndBuffLen = 0.05f;// sec
     float _dt = 0;
-    float _pointTime = 0.001f;
+    float _timeInPointSec = 0.001f;//
+    float _maxFrequency = 0.;
+    float _minFrequency = 0.;
     long long _recieveCount = 0;
-    size_t _nextIdx = 0;
+    bool _isPaused = false;
     std::function<void(long long)> _onRecieve;
     
     void addAvrData(const std::vector<SignalDataType>& source, int buffIdx);

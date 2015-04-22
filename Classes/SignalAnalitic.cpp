@@ -8,8 +8,28 @@
 
 #include "SignalAnalitic.h"
 #include "FFT.h"
+#include <math.h>
+#include <algorithm>
 
-std::vector<SignalDataType> SignalAnalitic::avarage(const std::vector<SignalDataType>& signal, size_t dataCount, float delta, float avDelta)
+void RoundBuff::addData(const Signal& source)
+{
+    size_t destSize = data.size();
+    for(auto& item : source)
+    {
+        data[pos] = item;
+        pos++;
+        if (pos >= destSize)
+            pos = 0;
+    }
+}
+
+void RoundBuff::clearData()
+{
+    std::fill(data.begin(), data.end(), 0);
+    pos = 0;
+}
+
+Signal SignalAnalitic::avarage(const Signal& signal, size_t dataCount, float delta, float avDelta)
 {
     std::vector<SignalDataType> res;
     size_t avrCount = ceil(dataCount*(double)delta/(double)avDelta);
@@ -43,9 +63,10 @@ std::vector<SignalDataType> SignalAnalitic::avarage(const std::vector<SignalData
     return res;
 }
 
-size_t SignalAnalitic::avarage(const Signal& signal, size_t dataCount, float delta, float avDelta, Signal& dest, size_t destIdx)
+void SignalAnalitic::avarage(const Signal& signal, size_t dataCount, float delta, float avDelta, RoundBuff& dest)
 {
     //size_t avrCount = ceil(dataCount*(double)delta/(double)avDelta);
+    size_t destIdx = dest.pos;
     auto itEnd = signal.begin() +  std::min(dataCount, signal.size());
     size_t destSize = dest.size();
     
@@ -53,7 +74,7 @@ size_t SignalAnalitic::avarage(const Signal& signal, size_t dataCount, float del
     {
         for(auto it = signal.begin(); it != itEnd; ++it)
         {
-            dest[destIdx] = *it;
+            dest.data[destIdx] = *it;
             destIdx++;
             if (destSize == destIdx)
                 destIdx = 0;
@@ -78,7 +99,7 @@ size_t SignalAnalitic::avarage(const Signal& signal, size_t dataCount, float del
                 auto dy = *it - *(it-1);
                 idx -= avDelta;
                 sum += static_cast<long>(dy*(1.f - idx));
-                dest[destIdx] = sum/sumCount;
+                dest.data[destIdx] = sum/sumCount;
                 destIdx++;
                 if (destSize == destIdx)
                     destIdx = 0;
@@ -89,14 +110,14 @@ size_t SignalAnalitic::avarage(const Signal& signal, size_t dataCount, float del
         }
         if (sumCount != 0)
         {
-            dest[destIdx] = sum/sumCount;
+            dest.data[destIdx] = sum/sumCount;
             destIdx++;
             if (destSize == destIdx)
                 destIdx = 0;
         }
     }
 
-    return destIdx;
+    dest.pos = destIdx;
 
 }
 
@@ -150,5 +171,18 @@ void SignalAnalitic::FFT(const Signal& signal, size_t startIdx, float deltaTime,
             spectr.maxAmplutide = item.re;
         else if (item.re < spectr.minAmplutide)
             spectr.minAmplutide = item.re;
+    }
+    spectr.maxFreq = 1.f/(2*deltaTime);
+    spectr.deltaFreq = spectr.maxFreq/pow2;
+}
+
+void SignalAnalitic::testSignal(int periodCount, float shiftX, float shiftY, Signal& signal)
+{
+    size_t size = signal.size();
+    float dt =2*M_PI*periodCount/size;
+    float ampl = ((sizeof(SignalDataType) << 8) - shiftY)/2.f;
+    for(size_t i = 0; i < size; i++)
+    {
+        signal.at(i) = static_cast<SignalDataType>(ampl*sin(dt*i + shiftX) + shiftY);
     }
 }
