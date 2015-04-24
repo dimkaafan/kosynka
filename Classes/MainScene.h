@@ -62,6 +62,12 @@ private:
     
     float _xTimeSec = 0.2f;
     SignalWindow _signalWin=SignalWindow(0.0f, 1.f, 0.1f);
+    SignalWindow _spektrWin=SignalWindow(0.0f, 1.f, 0.1f);
+    
+    enum class TouchType{NONE, SCROLL, ZOOM};
+    TouchType _touchType = TouchType::NONE;
+    
+    SignalManager _rawSignal;
     
     virtual cocos2d::spritebuilder::ccReaderClickCallback onResolveCCBClickSelector(const std::string &selectorName, cocos2d::Node* node) override;
     virtual bool onAssignCCBMemberVariable(const std::string &memberVariableName, cocos2d::Node* node) override;
@@ -83,15 +89,17 @@ private:
     void onTouchesEnded(const std::vector<cocos2d::Touch*>&, cocos2d::Event*);
     void onTouchesCancelled(const std::vector<cocos2d::Touch*>&, cocos2d::Event*);
     
+    bool isNodeContainTouches(const std::vector<cocos2d::Touch*>& touches, cocos2d::Node* node);
+    
     void onRecieveSignal(long long);
     void drawAxis(cocos2d::Node* node);
     
     void drawSignal();
     void drawSpectr();
+    void drawData(const RoundBuff& source, const SignalWindow& viewWin, cocos2d::Node* target,std::vector<cocos2d::Node*>& dest);
     
     void updateFrequency();
-    
-    SignalManager _rawSignal;
+
 };
 
 #endif // __HELLOWORLD_SCENE_H__

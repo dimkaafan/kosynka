@@ -72,9 +72,9 @@ bool MainScene::init()
         _node_fft->addChild(nodeSpectr);
         _spectrPoints.push_back(nodeSpectr);
     }
-    
-#if 1
     auto dispatcher = cocos2d::Director::getInstance()->getEventDispatcher();
+    
+#if 0
     auto touchListener = cocos2d::EventListenerTouchOneByOne::create();
     touchListener->onTouchBegan = CC_CALLBACK_2(MainScene::onTouchBegan, this);
     touchListener->onTouchMoved = CC_CALLBACK_2(MainScene::onTouchMoved, this);
@@ -89,7 +89,7 @@ bool MainScene::init()
     touchesListener->onTouchesEnded = CC_CALLBACK_2(MainScene::onTouchesEnded, this);
     touchesListener->onTouchesCancelled = CC_CALLBACK_2(MainScene::onTouchesCancelled, this);
     dispatcher->addEventListenerWithSceneGraphPriority(touchesListener, this);
-    _listener = touchListener;
+    _listener = touchesListener;
 #endif
     initAudio();
     drawAxis(_node_graphic);
@@ -155,14 +155,10 @@ void MainScene::onRecieveSignal(long long count)
 void MainScene::drawSignal()
 {
     const auto& signal = _rawSignal.getAvrSignal();
-    
-    
-    auto minY = _rawSignal.getMinY();
-    auto maxY = _rawSignal.getMaxY();
-    
+
     auto sz = _node_graphic->getContentSize();
-    _maxY->setString(std::to_string(maxY));
-    _minY->setString(std::to_string(minY));
+    _maxY->setString(std::to_string(signal.maxY));
+    _minY->setString(std::to_string(signal.minY));
     _xTime->setString(floatToStr(_rawSignal.getXTime()));
     
     float pointTime = _rawSignal.getTimeInPoint();
@@ -183,31 +179,7 @@ void MainScene::drawSignal()
     timeStr += "(" + floatToStr(pointTime) + pref + ")";
     _xTime->setString(timeStr);
 
-
-    float fx = sz.width/(signal.data.size()*_signalWin._width);
-    float fy = (maxY - minY) > 0 ? sz.height/2/(maxY - minY) : 0;
-    size_t maxIdx = std::max(signal.size(), _points.size());
-    size_t minSignalIdx = static_cast<size_t>(roundf(signal.size()*_signalWin._start));
-    size_t maxSignalIdx = minSignalIdx + static_cast<size_t>(roundf(signal.size()*_signalWin._width));
-    
-    for(size_t i = 0; i < maxIdx; i++)
-    {
-        size_t xIdx = i < signal.pos ? i + maxIdx : i;
-        xIdx -= signal.pos;
-        auto pItem = _points.at(i);
-        if (xIdx >= minSignalIdx && xIdx < maxSignalIdx)
-        {
-            auto& dataItem = signal.data.at(i);
-            pItem->setPosition(fx*(xIdx - minSignalIdx) , sz.height/2 + fy*dataItem);
-            pItem->setVisible(true);
-        }
-        else
-            pItem->setVisible(false);
-    }
-    for(auto it = _points.begin() + maxIdx; it != _points.end(); ++it)
-    {
-        (*it)->setVisible(false);
-    }
+    drawData(signal, _signalWin, _node_graphic, _points);
 }
 
 void MainScene::drawSpectr()
@@ -227,6 +199,40 @@ void MainScene::drawSpectr()
         pItem->setVisible(true);
     }
     for(auto it = _spectrPoints.begin() + maxIdx; it != _spectrPoints.end(); ++it)
+    {
+        (*it)->setVisible(false);
+    }
+
+}
+
+void MainScene::drawData(const RoundBuff& source, const SignalWindow& viewWin, cocos2d::Node* target, std::vector<cocos2d::Node*>& dest)
+{
+    auto minY = source.minY;
+    auto maxY = source.maxY;
+    
+    auto sz = target->getContentSize();
+    
+    float fx = sz.width/(source.size()*viewWin._width);
+    float fy = (maxY - minY) > 0 ? sz.height/2/(maxY - minY) : 0;
+    size_t maxIdx = std::max(source.size(), dest.size());
+    size_t minSignalIdx = static_cast<size_t>(roundf(source.size()*viewWin._start));
+    size_t maxSignalIdx = minSignalIdx + static_cast<size_t>(roundf(source.size()*viewWin._width));
+    
+    for(size_t i = 0; i < maxIdx; i++)
+    {
+        size_t xIdx = i < source.pos ? i + maxIdx : i;
+        xIdx -= source.pos;
+        auto pItem = dest.at(i);
+        if (xIdx >= minSignalIdx && xIdx < maxSignalIdx)
+        {
+            auto& dataItem = source.data.at(i);
+            pItem->setPosition(fx*(xIdx - minSignalIdx) , sz.height/2 + fy*dataItem);
+            pItem->setVisible(true);
+        }
+        else
+            pItem->setVisible(false);
+    }
+    for(auto it = dest.begin() + maxIdx; it != dest.end(); ++it)
     {
         (*it)->setVisible(false);
     }
@@ -279,21 +285,12 @@ void MainScene::onXWinDown(cocos2d::Ref* target)
 
 bool MainScene::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event*)
 {
-    cocos2d::Rect bbox = _node_graphic->getBoundingBox();
-    bbox.origin.set(0, 0);
-    if (bbox.containsPoint(_node_graphic->convertTouchToNodeSpace(touch)))
-    {
+    _scrollNode = nullptr;
+    if (isNodeContainTouches({touch}, _node_graphic))
         _scrollNode = _node_graphic;
-        return true;
-    }
-    bbox = _node_fft->getBoundingBox();
-    bbox.origin.set(0, 0);
-    if (bbox.containsPoint(_node_fft->convertTouchToNodeSpace(touch)))
-    {
+    else if (isNodeContainTouches({touch}, _node_fft))
         _scrollNode = _node_fft;
-        return true;
-    }
-    return false;
+    return _scrollNode != nullptr;
 }
 
 void MainScene::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event*)
@@ -317,14 +314,56 @@ void MainScene::onTouchCancelled(cocos2d::Touch*, cocos2d::Event*)
     _scrollNode = nullptr;
 }
 
-void MainScene::onTouchesBegan(const std::vector<cocos2d::Touch*>&, cocos2d::Event*)
+void MainScene::onTouchesBegan(const std::vector<cocos2d::Touch*>& touches, cocos2d::Event* event)
 {
-    
+    _touchType = TouchType::NONE;
+    if (touches.size() < 3)
+    {
+        _scrollNode = nullptr;
+        if (isNodeContainTouches(touches, _node_graphic))
+            _scrollNode = _node_graphic;
+        else if (isNodeContainTouches(touches, _node_fft))
+            _scrollNode = _node_fft;
+        if (_scrollNode)
+        {
+            switch(touches.size())
+            {
+                case 1:
+                    _touchType = TouchType::SCROLL;
+                break;
+                case 2:
+                    _touchType = TouchType::ZOOM;
+                    //_touchRect.origin = touches.at(0)->getLocation();
+                break;
+                default:
+                    _touchType = TouchType::NONE;
+            }
+        }
+    }
 }
 
-void MainScene::onTouchesMoved(const std::vector<cocos2d::Touch*>&, cocos2d::Event*)
+void MainScene::onTouchesMoved(const std::vector<cocos2d::Touch*>& touches, cocos2d::Event* event)
 {
-    
+    if (touches.size() == 1)// move window
+    {
+        if (_scrollNode)
+        {
+            auto cs = _scrollNode->getContentSize();
+            _signalWin.shiftPos(-touches.front()->getDelta().x/cs.width);
+            if (_rawSignal.isPaused())
+                drawSignal();
+        }
+    }
+    else if (touches.size() == 2)
+    {
+        float prevWidth = fabs(touches.at(0)->getPreviousLocation().x - touches.at(1)->getPreviousLocation().x);
+        float width = fabs(touches.at(0)->getLocation().x - touches.at(1)->getLocation().x);
+        //if (width > prevWidth);
+        _signalWin.changeWidth(width > prevWidth ? -0.1f : 0.1f);
+        if (_rawSignal.isPaused())
+            drawSignal();
+        
+    }
 }
 
 void MainScene::onTouchesEnded(const std::vector<cocos2d::Touch*>&, cocos2d::Event*)
@@ -335,6 +374,17 @@ void MainScene::onTouchesEnded(const std::vector<cocos2d::Touch*>&, cocos2d::Eve
 void MainScene::onTouchesCancelled(const std::vector<cocos2d::Touch*>&, cocos2d::Event*)
 {
     
+}
+
+bool MainScene::isNodeContainTouches(const std::vector<cocos2d::Touch*>& touches, cocos2d::Node* node)
+{
+    cocos2d::Rect bbox = node->getBoundingBox();
+    bbox.origin.set(0, 0);
+    size_t touchCount = 0;
+    for(auto& item: touches)
+        if (bbox.containsPoint(_node_graphic->convertTouchToNodeSpace(item)))
+            touchCount++;
+    return touches.size() == touchCount;
 }
 
 void MainScene::drawAxis(cocos2d::Node* node)

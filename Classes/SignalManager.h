@@ -35,8 +35,7 @@ public:
     void setOnRecieveFunction(const std::function<void(long long)>& func);
     const RoundBuff& getAvrSignal() const;
     const Spectr& getSpectr() const;
-    SignalDataType getMinY() const;
-    SignalDataType getMaxY() const;
+
     float getXTime() const;
     void setSoundBuffTime(float timeSec);
     bool setTimeInPoint(float pointTime);
@@ -49,7 +48,6 @@ private:
     int _bufferCount = 16;
     std::vector< Signal > _rawData;
     RoundBuff _avrData;
-    //Signal _avrData;
     Spectr _spectr;
     SignalDataType _minY = 0;
     SignalDataType _maxY = 0;

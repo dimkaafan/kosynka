@@ -19,7 +19,9 @@ typedef std::vector<ShortComplex> SpectrData;
 class RoundBuff
 {
 public:
-    size_t pos;
+    size_t pos = 0;
+    SignalDataType minY = 0;
+    SignalDataType maxY = 0;
     Signal data;
     RoundBuff(size_t signalSize):pos(0), data(signalSize, 0){}
     size_t size() const{ return data.size();}
@@ -46,8 +48,6 @@ public:
     static bool getMinMax(const Signal& signal, SignalDataType& minY, SignalDataType& maxY);
     static void FFT(const Signal& signal, size_t startIdx, float deltaTime, Spectr& spectr);
     static void testSignal(int periodCount, float shiftX, float shiftY, Signal& signal);
-private:
-    //std::vector<SignalDataType> _signal;
 };
 
 #endif /* defined(__trapSound__SignalAnalitic__) */

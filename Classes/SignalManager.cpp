@@ -175,7 +175,7 @@ void SignalManager::audioCallback(
     _nextIdx = 0;
 #endif
     
-    SignalAnalitic::getMinMax(_avrData.data, _minY, _maxY);
+    SignalAnalitic::getMinMax(_avrData.data, _avrData.minY, _avrData.maxY);
     SignalAnalitic::FFT(_avrData.data, _avrData.pos, _timeInPointSec, _spectr);
     
     std::fill(rawBuff.begin(), rawBuff.begin() + inNumberPacketDescriptions , 0);
@@ -199,15 +199,6 @@ const Spectr& SignalManager::getSpectr() const
     return _spectr;
 }
 
-SignalDataType SignalManager::getMinY() const
-{
-    return _minY;
-}
-
-SignalDataType SignalManager::getMaxY() const
-{
-    return _maxY;
-}
 
 float SignalManager::getXTime() const
 {
@@ -236,5 +227,5 @@ void SignalManager::addAvrData(const std::vector<SignalDataType>& source, int bu
     _avrData.addData(source);
     size_t destSize = _avrData.size();
     
-    SignalAnalitic::getMinMax(_avrData.data, _minY, _maxY);
+    SignalAnalitic::getMinMax(_avrData.data, _avrData.minY, _avrData.maxY);
 }
