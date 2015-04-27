@@ -46,12 +46,12 @@ public:
     CREATE_FUNC(MainScene);
 private:
     MainScene();
-    cocos2d::Label* _count = nullptr;
     cocos2d::Label* _maxY = nullptr;
     cocos2d::Label* _minY = nullptr;
     cocos2d::Label* _xTime = nullptr;
     cocos2d::Label* _max_frequency = nullptr;
     cocos2d::Node* _pause = nullptr;
+    cocos2d::Node* _resume = nullptr;
     cocos2d::Node* _node_graphic = nullptr;
     cocos2d::Node* _node_fft = nullptr;
     cocos2d::Node* _scrollNode = nullptr;
@@ -60,12 +60,21 @@ private:
     std::vector<cocos2d::Node*> _spectrPoints;
     cocos2d::EventListener* _listener = nullptr;
     
+    struct SignalDesc
+    {
+        SignalDesc(cocos2d::Node* node, const RoundBuff& signal, SignalWindow& win):_node(node), _signal(signal), _win(win), _axisNode(nullptr)
+        {}
+        cocos2d::Node* _node;
+        cocos2d::Node* _axisNode;
+        const RoundBuff& _signal;
+        SignalWindow& _win;
+    };
+    
+    std::map<cocos2d::Node*, SignalDesc> _drawSignals;
+    
     float _xTimeSec = 0.2f;
     SignalWindow _signalWin=SignalWindow(0.0f, 1.f, 0.1f);
     SignalWindow _spektrWin=SignalWindow(0.0f, 1.f, 0.1f);
-    
-    enum class TouchType{NONE, SCROLL, ZOOM};
-    TouchType _touchType = TouchType::NONE;
     
     SignalManager _rawSignal;
     
@@ -76,8 +85,6 @@ private:
     void onResume(cocos2d::Ref* target);
     void onXTimeUp2(cocos2d::Ref* target);
     void onXTimeDown2(cocos2d::Ref* target);
-    void onXWinUp(cocos2d::Ref* target);
-    void onXWinDown(cocos2d::Ref* target);
     
     bool onTouchBegan(cocos2d::Touch*, cocos2d::Event*);
     void onTouchMoved(cocos2d::Touch*, cocos2d::Event*);
@@ -92,7 +99,7 @@ private:
     bool isNodeContainTouches(const std::vector<cocos2d::Touch*>& touches, cocos2d::Node* node);
     
     void onRecieveSignal(long long);
-    void drawAxis(cocos2d::Node* node);
+    cocos2d::Node* drawAxis(cocos2d::Node* node, const cocos2d::Rect& graphRect);
     
     void drawSignal();
     void drawSpectr();

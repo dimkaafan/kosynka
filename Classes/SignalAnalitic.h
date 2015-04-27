@@ -29,11 +29,12 @@ public:
     void clearData();
 };
 
-struct Spectr
+class Spectr
 {
+public:
+    Spectr():amplituda(0){}
     SpectrData data;
-    double maxAmplutide;
-    double minAmplutide;
+    RoundBuff amplituda;
     double deltaFreq;
     double maxFreq;
 };
@@ -46,7 +47,8 @@ public:
     static Signal avarage(const Signal& signal, size_t dataCount, float delta, float avDelta);
     static void avarage(const Signal& signal, size_t dataCount, float deltaTime, float timeInPoint, RoundBuff& dest);
     static bool getMinMax(const Signal& signal, SignalDataType& minY, SignalDataType& maxY);
-    static void FFT(const Signal& signal, size_t startIdx, float deltaTime, Spectr& spectr);
+    static void FFT(const Signal& source, size_t startIdx, float deltaTime, Spectr& spectr);
+    static void FFT(const Signal& source, size_t startIdx, float deltaTime, Signal& dest);
     static void testSignal(int periodCount, float shiftX, float shiftY, Signal& signal);
 };
 

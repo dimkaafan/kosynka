@@ -12,6 +12,8 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
+		32A14C311AEA966C0022C0B5 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32A14C2F1AEA966C0022C0B5 /* Utils.cpp */; };
+		32A14C321AEA966C0022C0B5 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32A14C2F1AEA966C0022C0B5 /* Utils.cpp */; };
 		46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8919C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8A19C43A87006E1F66 /* MainScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8619C43A87006E1F66 /* MainScene.cpp */; };
@@ -115,6 +117,8 @@
 		1D6058910D05DD3D006BFB54 /* trapSound iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "trapSound iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		32A14C2F1AEA966C0022C0B5 /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
+		32A14C301AEA966C0022C0B5 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		46880B8419C43A87006E1F66 /* AppDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppDelegate.cpp; sourceTree = "<group>"; };
 		46880B8519C43A87006E1F66 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		46880B8619C43A87006E1F66 /* MainScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MainScene.cpp; sourceTree = "<group>"; };
@@ -315,6 +319,8 @@
 				CEEF87721A9E009000369750 /* SignalTypes.h */,
 				CEEF87751A9E01BB00369750 /* SignalManager.cpp */,
 				CEEF87761A9E01BB00369750 /* SignalManager.h */,
+				32A14C2F1AEA966C0022C0B5 /* Utils.cpp */,
+				32A14C301AEA966C0022C0B5 /* Utils.h */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -526,6 +532,7 @@
 				CEEF87731A9E009000369750 /* SignalTypes.cpp in Sources */,
 				46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */,
 				46880B8A19C43A87006E1F66 /* MainScene.cpp in Sources */,
+				32A14C311AEA966C0022C0B5 /* Utils.cpp in Sources */,
 				CEEF87771A9E01BB00369750 /* SignalManager.cpp in Sources */,
 				CEEF876C1A9DFFD400369750 /* SignalAnalitic.cpp in Sources */,
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
@@ -542,6 +549,7 @@
 				CEC097E61ACBC66700E2C7CD /* FFT.cpp in Sources */,
 				46880B8919C43A87006E1F66 /* AppDelegate.cpp in Sources */,
 				503AE10517EB98FF00D1A890 /* main.cpp in Sources */,
+				32A14C321AEA966C0022C0B5 /* Utils.cpp in Sources */,
 				CEEF876D1A9DFFD400369750 /* SignalAnalitic.cpp in Sources */,
 				CEEF87781A9E01BB00369750 /* SignalManager.cpp in Sources */,
 				46880B8B19C43A87006E1F66 /* MainScene.cpp in Sources */,

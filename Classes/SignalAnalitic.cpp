@@ -146,7 +146,10 @@ void SignalAnalitic::FFT(const Signal& signal, size_t startIdx, float deltaTime,
         sourceSize >>= 1;
     }
     if ( (1 << pow2) != spectr.data.size() )
-        spectr.data.resize(1 << pow2); //setSize(1 << pow2);
+    {
+        spectr.data.resize(1 << pow2);
+        spectr.amplituda.data.resize(1 << (pow2-1));
+    }
     sourceSize = signal.size();
     auto it = signal.begin() + startIdx;
     for(auto& item : spectr.data)
@@ -158,22 +161,35 @@ void SignalAnalitic::FFT(const Signal& signal, size_t startIdx, float deltaTime,
             it = signal.begin();
     }
     fft(&spectr.data[0], pow2, false);
+    
+    size_t idx = 0;
+    auto itE = spectr.data.begin();
+    std::advance(itE, 1 << (pow2 - 1));
+    
     pow2 = 1 << pow2;
-    for(auto& item : spectr.data)
+    for(auto it = spectr.data.begin(); it != itE; ++it)
     {
-        item.re = sqrt(item.re*item.re + item.im*item.im)/pow2;
+        auto& item = *it;
+        spectr.amplituda.data[idx] = sqrt(item.re*item.re + item.im*item.im)/pow2;
+        idx++;
     }
     
-    spectr.maxAmplutide = spectr.minAmplutide = spectr.data[0].re;
-    for(auto& item : spectr.data)
+    auto& spektrAmpl = spectr.amplituda.data;
+    spectr.amplituda.minY = spectr.amplituda.maxY = spektrAmpl[0];
+    for(auto& item : spectr.amplituda.data)
     {
-        if (item.re > spectr.maxAmplutide)
-            spectr.maxAmplutide = item.re;
-        else if (item.re < spectr.minAmplutide)
-            spectr.minAmplutide = item.re;
+        if (item > spectr.amplituda.maxY)
+            spectr.amplituda.maxY = item;
+        else if (item < spectr.amplituda.minY)
+            spectr.amplituda.minY = item;
     }
     spectr.maxFreq = 1.f/(2*deltaTime);
     spectr.deltaFreq = spectr.maxFreq/pow2;
+}
+
+void SignalAnalitic::FFT(const Signal& source, size_t startIdx, float deltaTime, Signal& dest)
+{
+
 }
 
 void SignalAnalitic::testSignal(int periodCount, float shiftX, float shiftY, Signal& signal)
