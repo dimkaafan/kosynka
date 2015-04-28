@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/MainScene.cpp"
-            timestampString = "451810678.526191"
+            timestampString = "451903425.369054"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "132"
-            endingLineNumber = "132">
+            startingLineNumber = "148"
+            endingLineNumber = "148">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -24,11 +24,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/MainScene.cpp"
-            timestampString = "451810678.526191"
+            timestampString = "451903425.369054"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "141"
-            endingLineNumber = "141"
+            startingLineNumber = "157"
+            endingLineNumber = "157"
             landmarkName = "MainScene::drawSignal()"
             landmarkType = "5">
          </BreakpointContent>
@@ -40,11 +40,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/MainScene.cpp"
-            timestampString = "451810678.526191"
+            timestampString = "451903425.369054"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "223"
-            endingLineNumber = "223"
+            startingLineNumber = "278"
+            endingLineNumber = "278"
             landmarkName = "MainScene::onXTimeUp2(cocos2d::Ref* target)"
             landmarkType = "5">
          </BreakpointContent>
@@ -56,11 +56,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/MainScene.cpp"
-            timestampString = "451810678.526191"
+            timestampString = "451903425.369054"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "158"
-            endingLineNumber = "158"
+            startingLineNumber = "174"
+            endingLineNumber = "174"
             landmarkName = "MainScene::drawSignal()"
             landmarkType = "5">
          </BreakpointContent>
@@ -72,11 +72,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/MainScene.cpp"
-            timestampString = "451810678.526191"
+            timestampString = "451903425.369054"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "148"
-            endingLineNumber = "148"
+            startingLineNumber = "164"
+            endingLineNumber = "164"
             landmarkName = "MainScene::drawSignal()"
             landmarkType = "5">
          </BreakpointContent>
@@ -104,11 +104,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/MainScene.cpp"
-            timestampString = "451810678.526191"
+            timestampString = "451903425.369054"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "264"
-            endingLineNumber = "264"
+            startingLineNumber = "313"
+            endingLineNumber = "313"
             landmarkName = "MainScene::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event*)"
             landmarkType = "5">
          </BreakpointContent>
@@ -120,11 +120,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/MainScene.cpp"
-            timestampString = "451810678.526191"
+            timestampString = "451903425.369054"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "267"
-            endingLineNumber = "267"
+            startingLineNumber = "316"
+            endingLineNumber = "316"
             landmarkName = "MainScene::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event*)"
             landmarkType = "5">
          </BreakpointContent>
@@ -136,11 +136,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/MainScene.cpp"
-            timestampString = "451810678.526191"
+            timestampString = "451903425.369054"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "167"
-            endingLineNumber = "167"
+            startingLineNumber = "193"
+            endingLineNumber = "193"
             landmarkName = "MainScene::drawSpectr()"
             landmarkType = "5">
          </BreakpointContent>
@@ -152,11 +152,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/MainScene.cpp"
-            timestampString = "451810678.526191"
+            timestampString = "451903425.369054"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "84"
-            endingLineNumber = "84"
+            startingLineNumber = "86"
+            endingLineNumber = "86"
             landmarkName = "MainScene::init()"
             landmarkType = "5">
          </BreakpointContent>
@@ -216,44 +216,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/MainScene.cpp"
-            timestampString = "451810678.526191"
+            timestampString = "451903425.369054"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "224"
-            endingLineNumber = "224"
+            startingLineNumber = "279"
+            endingLineNumber = "279"
             landmarkName = "MainScene::onXTimeUp2(cocos2d::Ref* target)"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../Classes/MainScene.cpp"
-            timestampString = "451813619.121432"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "358"
-            endingLineNumber = "358"
-            landmarkName = "MainScene::drawAxis(cocos2d::Node* node, const cocos2d::Rect&amp; graphRect)"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../Classes/MainScene.cpp"
-            timestampString = "451813672.326371"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "359"
-            endingLineNumber = "359"
-            landmarkName = "MainScene::drawAxis(cocos2d::Node* node, const cocos2d::Rect&amp; graphRect)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

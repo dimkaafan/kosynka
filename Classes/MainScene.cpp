@@ -6,6 +6,8 @@
 #include "Utils.h"
 
 const size_t BUFFER_SIZE = 2048;
+const int INDENTX = 10;
+const int INDENTY = 10;
 
 USING_NS_CC;
 
@@ -77,7 +79,7 @@ bool MainScene::init()
     
     auto it = _drawSignals.insert({_node_graphic, SignalDesc(_node_graphic, _rawSignal.getAvrSignal(), _signalWin)});
     if (it.second)
-        it.first->second._axisNode = drawAxis(_node_graphic, cocos2d::Rect(0,0, _rawSignal.getXTime(), 0));
+        updateSignalAxis();
     _drawSignals.insert({_node_fft, SignalDesc(_node_fft, _rawSignal.getAvrSignal(), _spektrWin)});
     _pause->setVisible(!_rawSignal.isPaused());
     _resume->setVisible(_rawSignal.isPaused());
@@ -103,6 +105,20 @@ void MainScene::updateFrequency()
 {
     auto diap = _rawSignal.getFrequencyGap();
     _max_frequency->setString(GameUtils::floatToStr(diap.first) + " - " + GameUtils::floatToStr(diap.second));
+}
+
+void MainScene::updateSignalAxis()
+{
+    auto it = _drawSignals.find(_node_graphic);
+    SignalDesc& sgnDesc = it->second;
+    if (sgnDesc._axisNode != nullptr)
+        sgnDesc._axisNode->removeFromParent();
+    DrawRect rect;
+    rect.indentX = INDENTX;
+    rect.indentY = INDENTY;
+    rect.sourceRect = cocos2d::Rect(0,0, _rawSignal.getXTime(), 0);
+    rect.destRect = _node_graphic->getBoundingBox();
+    sgnDesc._axisNode = drawAxis(_node_graphic, rect);
 }
 
 cocos2d::spritebuilder::ccReaderClickCallback MainScene::onResolveCCBClickSelector(const std::string &selectorName, cocos2d::Node* node)
@@ -158,31 +174,39 @@ void MainScene::drawSignal()
     timeStr += " (" + GameUtils::floatToStr(pointTime) + pref + ")";
     _xTime->setString(timeStr);
 
-    drawData(signal, _signalWin, _node_graphic, _points);
+    DrawRect drawRect;
+    drawRect.indentX = INDENTX;
+    drawRect.indentY = INDENTY;
+    drawRect.destRect = _node_graphic->getBoundingBox();
+    drawRect.sourceRect.setRect(0, signal.minY, 0, signal.maxY - signal.minY);
+    drawData(signal, _signalWin, drawRect, _node_graphic, _points);
 }
 
 void MainScene::drawSpectr()
 {
     const auto& spectr = _rawSignal.getSpectr();
-    drawData(spectr.amplituda, _spektrWin, _node_fft, _spectrPoints);
+    DrawRect drawRect;
+    drawRect.indentX = INDENTX;
+    drawRect.indentY = INDENTY;
+    drawRect.destRect = _node_fft->getBoundingBox();
+    drawRect.sourceRect.setRect(0, spectr.amplituda.minY, 0, spectr.amplituda.maxY - spectr.amplituda.minY);
+    drawData(spectr.amplituda, _spektrWin, drawRect, _node_fft, _spectrPoints);
 }
 
-void MainScene::drawData(const RoundBuff& source, const SignalWindow& viewWin, cocos2d::Node* target, std::vector<cocos2d::Node*>& dest)
+void MainScene::drawData(const RoundBuff& source, const SignalWindow& viewWin, const DrawRect& drawRect, cocos2d::Node* target, std::vector<cocos2d::Node*>& dest)
 {
     auto minY = source.minY;
     auto maxY = source.maxY;
     
-    auto sz = target->getContentSize();
-    float indentY = 10;
-    float indentX = 10;
+    const auto& destRect = drawRect.destRect.size;
     
-    float fx = (sz.width - 2*indentX)/(source.size()*viewWin._width);
-    float fy = (maxY - minY) > 0 ? (sz.height - 2*indentY)/(maxY - minY) : 0;
+    float fx = (destRect.width - 2*drawRect.indentX)/(source.size()*viewWin._width);
+    float fy = (maxY - minY) > 0 ? (destRect.height - 2*drawRect.indentY)/(maxY - minY) : 0;
     size_t maxIdx = std::max(source.size(), dest.size());
     size_t minSignalIdx = static_cast<size_t>(roundf(source.size()*viewWin._start));
     size_t maxSignalIdx = minSignalIdx + static_cast<size_t>(roundf(source.size()*viewWin._width));
     
-    float yy = indentY - fy*minY;
+    float yy = drawRect.indentY - fy*minY;
     
     for(size_t i = 0; i < maxIdx; i++)
     {
@@ -192,7 +216,7 @@ void MainScene::drawData(const RoundBuff& source, const SignalWindow& viewWin, c
         if (xIdx >= minSignalIdx && xIdx < maxSignalIdx)
         {
             auto& dataItem = source.data.at(i);
-            pItem->setPosition(fx*(xIdx - minSignalIdx) + indentX, yy + fy*dataItem);
+            pItem->setPosition(fx*(xIdx - minSignalIdx) + drawRect.indentX, yy + fy*dataItem);
             pItem->setVisible(true);
         }
         else
@@ -202,7 +226,38 @@ void MainScene::drawData(const RoundBuff& source, const SignalWindow& viewWin, c
     {
         (*it)->setVisible(false);
     }
+}
 
+cocos2d::Node* MainScene::drawAxis(cocos2d::Node* target, const DrawRect& drawRect)
+{
+    DrawNode* axisNode =DrawNode::create();
+    auto& bbox = drawRect.destRect;
+    float deltaBreak = 5;
+    //draw axis X
+    float  x = 0;
+    while(x < bbox.size.width)
+    {
+        axisNode->drawLine(Vec2(x, bbox.size.height/2),Vec2(x + deltaBreak, bbox.size.height/2),Color4F(1,0,0,1));
+        x += 2*deltaBreak;
+    }
+    
+    float xTime = drawRect.sourceRect.size.width;
+    float scX = (bbox.size.width - 2*drawRect.indentX)/xTime;
+    float pow10 = GameUtils::get10Factor(xTime);
+    int maxX = ceil(xTime/pow10);
+    scX *= pow10;
+    for(int i = 0; i < maxX; i++)
+    {
+        float y = 0;
+        float xx = drawRect.indentX + i*scX;
+        while (y < bbox.size.height)
+        {
+            axisNode->drawLine(Vec2(xx, y), Vec2(xx, y + deltaBreak), Color4F(1,0,0,1));
+            y += 2*deltaBreak;
+        }
+    }
+    target->addChild(axisNode);
+    return axisNode;
 }
 
 void MainScene::onPause(cocos2d::Ref* target)
@@ -223,12 +278,9 @@ void MainScene::onXTimeUp2(cocos2d::Ref* target)
 {
     if (_rawSignal.setXTime(_xTimeSec*2.f))
     {
-        auto it = _drawSignals.find(_node_graphic);
-        SignalDesc& sgnDesc = it->second;
-        sgnDesc._axisNode->removeFromParent();
-        sgnDesc._axisNode = drawAxis(_node_graphic, cocos2d::Rect(0,0, _rawSignal.getXTime(), 0));
         _xTimeSec *= 2.f;
         updateFrequency();
+        updateSignalAxis();
     }
 }
 
@@ -236,12 +288,9 @@ void MainScene::onXTimeDown2(cocos2d::Ref* target)
 {
     if (_rawSignal.setXTime(_xTimeSec/2.f))
     {
-        auto it = _drawSignals.find(_node_graphic);
-        SignalDesc& sgnDesc = it->second;
-        sgnDesc._axisNode->removeFromParent();
-        sgnDesc._axisNode = drawAxis(_node_graphic, cocos2d::Rect(0,0, _rawSignal.getXTime(), 0));
         _xTimeSec /= 2.f;
         updateFrequency();
+        updateSignalAxis();
     }
 }
 
@@ -340,35 +389,4 @@ bool MainScene::isNodeContainTouches(const std::vector<cocos2d::Touch*>& touches
         if (bbox.containsPoint(node->convertTouchToNodeSpace(item)))
             touchCount++;
     return touches.size() == touchCount;
-}
-
-cocos2d::Node* MainScene::drawAxis(cocos2d::Node* node, const cocos2d::Rect& graphRect)
-{
-    DrawNode* axisNode =DrawNode::create();
-    auto bbox = node->getBoundingBox();
-    float deltaBreak = 5;
-    //draw x
-    float  x = 0;
-    while(x < bbox.size.width)
-    {
-        axisNode->drawLine(Vec2(x, bbox.size.height/2),Vec2(x + deltaBreak, bbox.size.height/2),Color4F(1,0,0,1));
-        x += 2*deltaBreak;
-    }
-    
-    float xTime = graphRect.size.width;
-    float scX = bbox.size.width/xTime;
-    float pow10 = GameUtils::get10Factor(xTime);
-    int maxX = ceil(xTime/pow10);
-    scX *= pow10;
-    for(int i = 0; i < maxX; i++)
-    {
-        float y = 0;
-        while (y < bbox.size.height)
-        {
-            axisNode->drawLine(Vec2(i*scX, y), Vec2(i*scX, y + deltaBreak), Color4F(1,0,0,1));
-            y += 2*deltaBreak;
-        }
-    }
-    node->addChild(axisNode);
-    return axisNode;
 }

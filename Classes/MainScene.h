@@ -31,6 +31,14 @@ public:
     }
 };
 
+struct DrawRect
+{
+    cocos2d::Rect sourceRect;
+    cocos2d::Rect destRect;
+    float indentX;
+    float indentY;
+};
+
 class MainScene : public cocos2d::Node, public cocos2d::spritebuilder::CCBXReaderOwner
 {
 public:
@@ -99,13 +107,14 @@ private:
     bool isNodeContainTouches(const std::vector<cocos2d::Touch*>& touches, cocos2d::Node* node);
     
     void onRecieveSignal(long long);
-    cocos2d::Node* drawAxis(cocos2d::Node* node, const cocos2d::Rect& graphRect);
+    cocos2d::Node* drawAxis(cocos2d::Node* target, const DrawRect& signalBbox);
     
     void drawSignal();
     void drawSpectr();
-    void drawData(const RoundBuff& source, const SignalWindow& viewWin, cocos2d::Node* target,std::vector<cocos2d::Node*>& dest);
+    void drawData(const RoundBuff& source, const SignalWindow& viewWin, const DrawRect& drawRect, cocos2d::Node* target,std::vector<cocos2d::Node*>& dest);
     
     void updateFrequency();
+    void updateSignalAxis();
 
 };
 
