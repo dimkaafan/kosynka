@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "5087E73D17EB910900C73F5D"
-               BuildableName = "trapSound Mac.app"
-               BlueprintName = "trapSound Mac"
-               ReferencedContainer = "container:trapSound.xcodeproj">
+               BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+               BuildableName = "kosynka iOS.app"
+               BlueprintName = "kosynka iOS"
+               ReferencedContainer = "container:kosynka.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5087E73D17EB910900C73F5D"
-            BuildableName = "trapSound Mac.app"
-            BlueprintName = "trapSound Mac"
-            ReferencedContainer = "container:trapSound.xcodeproj">
+            BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+            BuildableName = "kosynka iOS.app"
+            BlueprintName = "kosynka iOS"
+            ReferencedContainer = "container:kosynka.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -48,13 +48,14 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5087E73D17EB910900C73F5D"
-            BuildableName = "trapSound Mac.app"
-            BlueprintName = "trapSound Mac"
-            ReferencedContainer = "container:trapSound.xcodeproj">
+            BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+            BuildableName = "kosynka iOS.app"
+            BlueprintName = "kosynka iOS"
+            ReferencedContainer = "container:kosynka.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -66,13 +67,14 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5087E73D17EB910900C73F5D"
-            BuildableName = "trapSound Mac.app"
-            BlueprintName = "trapSound Mac"
-            ReferencedContainer = "container:trapSound.xcodeproj">
+            BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+            BuildableName = "kosynka iOS.app"
+            BlueprintName = "kosynka iOS"
+            ReferencedContainer = "container:kosynka.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
