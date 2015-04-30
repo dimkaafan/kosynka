@@ -69,12 +69,6 @@
 		CEEF87661A9DD90C00369750 /* spriteFrameFileList.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEEF87641A9DD90C00369750 /* spriteFrameFileList.plist */; };
 		CEEF87681A9DE56200369750 /* Config in Resources */ = {isa = PBXBuildFile; fileRef = CEEF87671A9DE56200369750 /* Config */; };
 		CEEF87691A9DE56200369750 /* Config in Resources */ = {isa = PBXBuildFile; fileRef = CEEF87671A9DE56200369750 /* Config */; };
-		CEEF876C1A9DFFD400369750 /* SignalAnalitic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEEF876A1A9DFFD300369750 /* SignalAnalitic.cpp */; };
-		CEEF876D1A9DFFD400369750 /* SignalAnalitic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEEF876A1A9DFFD300369750 /* SignalAnalitic.cpp */; };
-		CEEF87731A9E009000369750 /* SignalTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEEF87711A9E009000369750 /* SignalTypes.cpp */; };
-		CEEF87741A9E009000369750 /* SignalTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEEF87711A9E009000369750 /* SignalTypes.cpp */; };
-		CEEF87771A9E01BB00369750 /* SignalManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEEF87751A9E01BB00369750 /* SignalManager.cpp */; };
-		CEEF87781A9E01BB00369750 /* SignalManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEEF87751A9E01BB00369750 /* SignalManager.cpp */; };
 		D44C620C132DFF330009C878 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D44C620B132DFF330009C878 /* OpenAL.framework */; };
 		D44C620E132DFF430009C878 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D44C620D132DFF430009C878 /* AVFoundation.framework */; };
 		D44C6210132DFF4E0009C878 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D44C620F132DFF4E0009C878 /* AudioToolbox.framework */; };
@@ -173,12 +167,6 @@
 		CEEF875F1A9DD8F400369750 /* fileLookup.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = fileLookup.plist; sourceTree = "<group>"; };
 		CEEF87641A9DD90C00369750 /* spriteFrameFileList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = spriteFrameFileList.plist; sourceTree = "<group>"; };
 		CEEF87671A9DE56200369750 /* Config */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Config; path = ../DevResources/Config; sourceTree = "<group>"; };
-		CEEF876A1A9DFFD300369750 /* SignalAnalitic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SignalAnalitic.cpp; sourceTree = "<group>"; };
-		CEEF876B1A9DFFD300369750 /* SignalAnalitic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SignalAnalitic.h; sourceTree = "<group>"; };
-		CEEF87711A9E009000369750 /* SignalTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SignalTypes.cpp; sourceTree = "<group>"; };
-		CEEF87721A9E009000369750 /* SignalTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SignalTypes.h; sourceTree = "<group>"; };
-		CEEF87751A9E01BB00369750 /* SignalManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SignalManager.cpp; sourceTree = "<group>"; };
-		CEEF87761A9E01BB00369750 /* SignalManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SignalManager.h; sourceTree = "<group>"; };
 		D44C620B132DFF330009C878 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		D44C620D132DFF430009C878 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		D44C620F132DFF4E0009C878 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -317,12 +305,6 @@
 				46880B8519C43A87006E1F66 /* AppDelegate.h */,
 				46880B8619C43A87006E1F66 /* MainScene.cpp */,
 				46880B8719C43A87006E1F66 /* MainScene.h */,
-				CEEF876A1A9DFFD300369750 /* SignalAnalitic.cpp */,
-				CEEF876B1A9DFFD300369750 /* SignalAnalitic.h */,
-				CEEF87711A9E009000369750 /* SignalTypes.cpp */,
-				CEEF87721A9E009000369750 /* SignalTypes.h */,
-				CEEF87751A9E01BB00369750 /* SignalManager.cpp */,
-				CEEF87761A9E01BB00369750 /* SignalManager.h */,
 				32A14C2F1AEA966C0022C0B5 /* Utils.cpp */,
 				32A14C301AEA966C0022C0B5 /* Utils.h */,
 				32A14C431AF0ACCB0022C0B5 /* GameField.cpp */,
@@ -535,12 +517,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CEEF87731A9E009000369750 /* SignalTypes.cpp in Sources */,
 				46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */,
 				46880B8A19C43A87006E1F66 /* MainScene.cpp in Sources */,
 				32A14C311AEA966C0022C0B5 /* Utils.cpp in Sources */,
-				CEEF87771A9E01BB00369750 /* SignalManager.cpp in Sources */,
-				CEEF876C1A9DFFD400369750 /* SignalAnalitic.cpp in Sources */,
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
 				CEC097E51ACBC66700E2C7CD /* FFT.cpp in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
@@ -558,10 +537,7 @@
 				503AE10517EB98FF00D1A890 /* main.cpp in Sources */,
 				32A14C461AF0ACCB0022C0B5 /* GameField.cpp in Sources */,
 				32A14C321AEA966C0022C0B5 /* Utils.cpp in Sources */,
-				CEEF876D1A9DFFD400369750 /* SignalAnalitic.cpp in Sources */,
-				CEEF87781A9E01BB00369750 /* SignalManager.cpp in Sources */,
 				46880B8B19C43A87006E1F66 /* MainScene.cpp in Sources */,
-				CEEF87741A9E009000369750 /* SignalTypes.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

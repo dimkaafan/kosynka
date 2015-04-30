@@ -31,13 +31,13 @@ enum class GameCart{
 
 enum class MAST{NONE, CHERVY, BUBNY, PIKI, KRESTY};
 
-enum class CartState{CS_CLOSE, CS_OPEN};
+enum class CartState{CLOSE, OPEN};
 
 class Cart
 {
     MAST _mast = MAST::NONE;
     GameCart _cart  = GameCart::NONE;
-    CartState _state = CartState::CS_CLOSE;
+    CartState _state = CartState::CLOSE;
     int _count = 0;
     void* _pObject = nullptr;
 public:
@@ -68,6 +68,9 @@ public:
     const void* getObject() const{ return _pObject;}
     MAST getMast() const {return _mast;}
     GameCart getCart() const {return _cart;}
+    void setState(CartState state){_state = state;}
+    CartState getState() const {return _state;}
+    bool isOpened() const { return _state == CartState::OPEN;}
 };
 
 class Coloda
@@ -80,10 +83,11 @@ public:
     const Cart& getNext();
     Cart popCart();
     
-    bool add(const Cart& );
+    bool add(const Cart& card, CartState state);
     void add(const Coloda&);
     bool remove(const Cart& );
     Coloda extract(size_t idx, size_t count = -1);
+    Coloda extractOpened();
     
     const std::vector<Cart>& getItems() const;
     std::vector<Cart>& getItems();
@@ -114,13 +118,18 @@ public:
     bool moveSourceCartToDest(const Cart&, Coloda& source, MAST destMast);
     bool moveMainCardToSource(const void* pObj, Coloda& source);
     bool moveMainCardToSource(const Cart&, Coloda& );
+    bool openSourceCard(Coloda& );
+    
+    Coloda& getMain();
+    std::vector<Coloda>& getSource();
+    std::map<MAST,Coloda>& getDest();
     
 private:
     GameFieldDelegate* _delegate = nullptr;
     Coloda  _coloda;
-    Coloda  _source[7];
+    std::vector<Coloda>  _source = std::vector<Coloda>(7);
     std::map<MAST, Coloda>  _dest={{MAST::BUBNY, Coloda()}, {MAST::CHERVY, Coloda()}, {MAST::PIKI, Coloda()}, {MAST::KRESTY, Coloda()}};
-    std::vector<int> _sourceCount;
+    std::vector<int> _sourceCount = {1,2,3,4,5,6,7};
     
 };
 

@@ -66,12 +66,13 @@ Cart Coloda::popCart()
     return res;
 }
 
-bool Coloda::add(const Cart& cart)
+bool Coloda::add(const Cart& cart, CartState state)
 {
     auto it = std::find(_carts.begin(), _carts.end(), cart);
     if (it == _carts.end())
     {
         _carts.emplace_back(cart);
+        _carts.back().setState(state);
         return true;
     }
     assert(false);
@@ -83,7 +84,7 @@ void Coloda::add(const Coloda& source)
     auto& items = source.getItems();
     for(auto& item : items)
     {
-        add(item);
+        add(item, item.getState());
     }
 }
 
@@ -117,11 +118,26 @@ Coloda Coloda::extract(size_t idx, size_t count)
             std::advance(itE, count);
         }
         for(auto it = itB; it != itE; ++it)
-            res.add(*it);
+            res.add(*it, it->getState());
         _carts.erase(itB, itE);
     }
     return res;
 }
+
+
+Coloda Coloda::extractOpened()
+{
+    Coloda res;
+    auto itB = std::find_if(_carts.begin(), _carts.end(), [](const Cart& item){ return item.isOpened();});
+    if (itB != _carts.end())
+    {
+        for(auto it = itB; it != _carts.end(); ++it)
+            res.add(*it, it->getState());
+        _carts.erase(itB, _carts.end());
+    }
+    return res;
+}
+
 
 const std::vector<Cart>& Coloda::getItems() const
 {
@@ -141,7 +157,6 @@ const Cart* Coloda::findByObject(const void* pObj) const
 
 GameField::GameField()
 {
-    _sourceCount = {1,2,3,4,5,6,7};
 }
 
 void GameField::setDelegate(GameFieldDelegate* delegate)
@@ -164,7 +179,7 @@ void GameField::reInit()
         auto& source = _source[item];
         source.clear();
         for(size_t i = 0; i < item; i++)
-            source.add(_coloda.popCart());
+            source.add(_coloda.popCart(), CartState::CLOSE);
     }
 }
 
@@ -217,7 +232,7 @@ bool GameField::moveSourceCartToDest(const Cart& cart, Coloda& source, MAST dest
                 return false;
         }
     }
-    dest.add(cart);
+    dest.add(cart, CartState::OPEN);
     source.remove(cart);
     return true;
 }
@@ -250,7 +265,36 @@ bool GameField::moveMainCardToSource(const Cart& cart, Coloda& source)
         if (delta != 1)
             return false;
     }
-    source.add(cart);
+    source.add(cart, CartState::OPEN);
     _coloda.remove(cart);
     return true;
+}
+
+bool GameField::openSourceCard(Coloda& source)
+{
+    auto& items = source.getItems();
+    if (!items.empty())
+    {
+        auto& backItem = items.back();
+        if (backItem.getState() == CartState::OPEN)
+            return false;
+        backItem.setState(CartState::OPEN);
+        return true;
+    }
+    return false;
+}
+
+Coloda& GameField::getMain()
+{
+    return _coloda;
+}
+
+std::vector<Coloda>& GameField::getSource()
+{
+    return  _source;
+}
+
+std::map<MAST,Coloda>& GameField::getDest()
+{
+    return _dest;
 }
