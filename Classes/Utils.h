@@ -9,7 +9,7 @@
 #ifndef __trapSound__Utils__
 #define __trapSound__Utils__
 
-//#include <stdio.h>
+#include <string>
 
 namespace GameUtils
 {

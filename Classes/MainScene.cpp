@@ -1,4 +1,3 @@
-#include <CoreAudio/CoreAudioTypes.h>
 #include <math.h>
 //#include "GameHelper/AndroidFix.h"
 #include "MainScene.h"
@@ -39,7 +38,7 @@ bool MainScene::init()
     cocos2d::Node * node = reader->createNode(this, cocos2d::spritebuilder::SceneScaleType::MAXSCALE);
     addChild(node);
     
-    auto bbox = _node_graphic->getBoundingBox();
+   // auto bbox = _node_graphic->getBoundingBox();
 
     auto dispatcher = cocos2d::Director::getInstance()->getEventDispatcher();
     
